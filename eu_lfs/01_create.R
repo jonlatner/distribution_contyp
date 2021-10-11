@@ -5,7 +5,7 @@ rm(list=ls(all=TRUE))
 
 # FOLDERS
 setwd("/Users/jonathanlatner/Google Drive/")
-# setwd("C:/Users/ba1ks6/Google Drive/")
+# setwd("C:/Users/ba1ks6/Google Drive/") asdfdsaf
 
 orig_data_files = "/Volumes/seccopa.empsoz/Data/EU-LFS/"
 project_data_files = "SECCOPA/projects/distribution_contyp/data_files/eu_lfs/"
