@@ -4,11 +4,10 @@
 rm(list=ls(all=TRUE))
 
 # FOLDERS
-setwd("/Users/jonathanlatner/Google Drive/")
-# setwd("C:/Users/ba1ks6/Google Drive/") asdfdsaf
+setwd("/Documents/GitHub/distribution_contyp/")
 
-orig_data_files = "/Volumes/seccopa.empsoz/Data/EU-LFS/"
-project_data_files = "SECCOPA/projects/distribution_contyp/data_files/eu_lfs/"
+orig_data_files = "orig_data_files/"
+project_data_files = "data_files/eu_lfs/"
 
 # LIBRARY
 library(dplyr)
