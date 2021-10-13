@@ -1,12 +1,20 @@
------------------------------------------
-# TOP COMMANDS
------------------------------------------
+# Top commands -----------------------------------------
+
+# https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+detachAllPackages <- function() {
+        basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+        package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+        package.list <- setdiff(package.list,basic.packages)
+        if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
+        
+}
+detachAllPackages()
 rm(list=ls(all=TRUE))
 
-# FOLDERS
-setwd("/Documents/GitHub/distribution_contyp/")
+# FOLDERS - ADAPT THIS PATHWAY
+setwd("Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
-orig_data_files = "orig_data_files/"
+orig_data_files = "orig_data_files/eu_lfs/"
 project_data_files = "data_files/eu_lfs/"
 
 # LIBRARY
@@ -37,7 +45,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1983_1997/",country[c],"_YEAR_1983_1997/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1983_1997/",country[c],"_YEAR_1983_1997/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -54,7 +62,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1983_1997/",country[c],"_YEAR_1983_1997/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1983_1997/",country[c],"_YEAR_1983_1997/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -71,7 +79,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -88,7 +96,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -105,7 +113,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -122,7 +130,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]
@@ -138,7 +146,7 @@ for(c in seq_along(country)) {
         print(country[c])
         for(yr in seq_along(year)) {
                 print(year[yr])
-                df <- read.csv(file = paste0(orig_data_files,"/YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
+                df <- read.csv(file = paste0(orig_data_files,"YearlyFiles_1998_2018/",country[c],"_YEAR_1998_onwards/",country[c],year[yr],"_y.csv"))
                 df <- select(df, TEMP, AGE, SEX, MARSTAT, COUNTRYB, ILOSTAT, FTPT, HATLEV1D, COEFF)
                 df$year <- year[yr]
                 df$country <- country[c]

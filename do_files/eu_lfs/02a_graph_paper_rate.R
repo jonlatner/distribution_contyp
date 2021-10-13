@@ -11,8 +11,7 @@ detachAllPackages <- function() {
 detachAllPackages()
 rm(list=ls(all=TRUE))
 
-# FOLDERS
-# ADAPT THIS PATHWAY
+# FOLDERS - ADAPT THIS PATHWAY
 setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_lfs/"
