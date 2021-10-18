@@ -1,0 +1,764 @@
+
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Top commands --------------------------------------------------------------
+> 
+> # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+> detachAllPackages <- function() {
++   basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
++   package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
++   package.list <- setdiff(package.list,basic.packages)
++   if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
++   
++ }
+> detachAllPackages()
+> rm(list=ls(all=TRUE))
+> 
+> # FOLDERS
+> setwd("/Users/jonathanlatner/Google Drive/")
+> # setwd("C:/Users/ba1ks6/Google Drive/")
+> 
+> data_files = "SECCOPA/projects/distribution_contyp/data_files/eu_silc/2_year_panel/"
+> results = "SECCOPA/projects/distribution_contyp/results/eu_silc/2_year_panel/"
+> 
+> # LIBRARY
+> library(tidyverse)
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.3.2     ✔ purrr   0.3.4
+✔ tibble  3.0.6     ✔ dplyr   1.0.4
+✔ tidyr   1.1.2     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.5.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+> library(beepr)
+> library(car) # recode
+Loading required package: carData
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:dplyr’:
+
+    recode
+
+The following object is masked from ‘package:purrr’:
+
+    some
+
+> library(broom) # tidy
+> library(survey)
+Loading required package: grid
+Loading required package: Matrix
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+Loading required package: survival
+
+Attaching package: ‘survey’
+
+The following object is masked from ‘package:graphics’:
+
+    dotchart
+
+> library(prediction) # prediction
+> library(margins) #margins
+> library(beepr)
+> 
+> options(scipen=999)
+> 
+> # Load data --------------------------------------------------------------
+> 
+> df_eu_silc <- readRDS(file = paste0(data_files,"df_eu_silc_clean_xc.rds"))
+> 
+> # Clean data  -----------------------------------------
+> 
+> df_eu_silc <- df_eu_silc %>%
++   filter(ftc_num > 0)
+> 
+> table(df_eu_silc$ftc_num)
+
+     1      2 
+140455  10560 
+> 
+> #tranform ftc_dur into categorical dummy variables
+> df_eu_silc$ftc_num <- recode(df_eu_silc$ftc_num, "1=0;2:hi=1")
+> 
+> # LPM --------------------------------------------------------------
+> # Country
+> country <- unique(sort(df_eu_silc$country_name))
+> country <- droplevels(country)
+> df_table_country = data.frame() # output
+> df_yhat_country = data.frame() # predict
+> df_mfx_country = data.frame() # mfx
+> for(c in country) {
++   df_country <- filter(df_eu_silc, country_name == c)
++   print(c)
++   
++   t <- data.frame(with(df_country,table(panel)))
++   t$country <- c
++   
++   # do not run models in country, years where models do not run do to low number of observations
++   t <- t %>%
++     mutate(test = ifelse((country == "United Kingdom" & (panel == 2009))
++                          ,
++                          yes = 0, no = 1)) %>%
++     filter(test == 1) %>%
++     mutate(panel = as.numeric(as.character(panel)))
++   t <- droplevels(t)
++   
++   panel <- unique(sort(t$panel))
++   for(p in panel) {
++     df_panel <- filter(df_country, panel == p)
++     print(p)
++     
++     df_new_data_yhat <- data.frame(
++       unique(
++         data.frame(
++           male = "0",
++           age_cat = "2",
++           edu_cat = "2")), 
++       row.names = NULL)
++     
++     my_svy <- svydesign(data = df_panel, 
++                         ids = ~1, # no clusters 
++                         weights =~ weight_long)
++     beta <- svyglm(ftc_num ~ male + age_cat + edu_cat, my_svy, family = "binomial")
++     
++     # summary table
++     table <- tidy(beta)
++     table$geography <- c
++     table$panel <- p
++     df_table_country <- rbind(df_table_country,table)
++     
++     # predict - country level change
++     yhat <- prediction(beta, data = df_new_data_yhat, calculate_se = TRUE)
++     yhat <- yhat %>%
++       select(fitted, se.fitted) %>%
++       rename(fit = fitted) %>%
++       mutate(lwr = fit - 1.96*se.fitted,
++              upr = fit + 1.96*se.fitted) %>%
++       select(-se.fitted)
++     yhat <- cbind(df_new_data_yhat,yhat)
++     yhat$geography <- c
++     yhat$panel <- p
++     df_yhat_country <- rbind(df_yhat_country,yhat)
++     
++     # margins
++     mfx <- summary(margins(beta,
++                            design = my_svy
++     ))
++     mfx$geography <- c
++     mfx$panel <- p
++     df_mfx_country <- rbind(df_mfx_country,mfx)
++   }
++ }
+[1] "Austria"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Belgium"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Bulgaria"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Croatia"
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Cyprus"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Czechia"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Denmark"
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Estonia"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Finland"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "France"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Greece"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Hungary"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Iceland"
+[1] 2008
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] "Ireland"
+[1] 2008
+[1] 2009
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Italy"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Latvia"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Lithuania"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Luxembourg"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Malta"
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Netherlands"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Norway"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Poland"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Portugal"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Romania"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Serbia"
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Slovakia"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2018
+[1] "Slovenia"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Spain"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Sweden"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Switzerland"
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] "United Kingdom"
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+There were 50 or more warnings (use warnings() to see the first 50)
+> 
+> rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy,df_country,country,c,t)
+> 
+> 
+> # EU
+> df_table_eu = data.frame() # output
+> df_yhat_eu = data.frame() # predict
+> df_mfx_eu = data.frame() # mfx
+> panel <- unique(df_eu_silc$panel)
+> for(p in panel) {
++   print(p)
++   df_panel <- filter(df_eu_silc, panel == p)
++   
++   df_new_data_yhat <- data.frame(
++     unique(
++       data.frame(
++         male = "0",
++         age_cat = "2",
++         edu_cat = "2")), 
++     row.names = NULL)
++   
++   my_svy <- svydesign(data = df_panel, 
++                       ids = ~1, # no clusters 
++                       weights =~ weight_long)
++   beta <- svyglm(ftc_num ~ male + age_cat + edu_cat, my_svy, family = "binomial")
++   
++   # summary table
++   table <- tidy(beta)
++   table$geography <- "EU-SILC"
++   table$panel <- p
++   df_table_eu <- rbind(df_table_eu,table)
++   
++   # predict - country level change
++   yhat <- prediction(beta, data = df_new_data_yhat, calculate_se = TRUE)
++   yhat <- yhat %>%
++     select(fitted, se.fitted) %>%
++     rename(fit = fitted) %>%
++     mutate(lwr = fit - 1.96*se.fitted,
++            upr = fit + 1.96*se.fitted) %>%
++     select(-se.fitted)
++   yhat <- cbind(df_new_data_yhat,yhat)
++   yhat$panel <- p
++   yhat$geography <- "EU-SILC"
++   yhat
++   
++   df_yhat_eu <- rbind(df_yhat_eu,yhat)
++   
++   # margins
++   mfx <- summary(margins(beta,
++                          design = my_svy
++   ))
++   mfx$panel <- p
++   mfx$geography <- "EU-SILC"
++   df_mfx_eu <- rbind(df_mfx_eu,mfx)
++ }
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+There were 12 warnings (use warnings() to see them)
+> 
+> rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy)
+> 
+> df_mfx_eu <- arrange(df_mfx_eu,factor,panel)
+> 
+> # Regions
+> region <- unique(df_eu_silc$region)
+> df_table_region = data.frame() # output
+> df_yhat_region = data.frame() # predict
+> df_mfx_region = data.frame() # mfx
+> for(r in region) {
++   df_region <- filter(df_eu_silc, region == r)
++   print(r)
++   
++   panel <- unique(df_region$panel)
++   for(p in panel) {
++     df_panel <- filter(df_region, panel == p)
++     print(p)
++     
++     df_new_data_yhat <- data.frame(
++       unique(
++         data.frame(
++           male = "0",
++           age_cat = "2",
++           edu_cat = "2")), 
++       row.names = NULL)
++     
++     my_svy <- svydesign(data = df_panel, 
++                         ids = ~1, # no clusters 
++                         weights =~ weight_long)
++     beta <- svyglm(ftc_num ~ male + age_cat + edu_cat, my_svy, family = "binomial")
++     
++     # summary table
++     table <- tidy(beta)
++     table$geography <- r
++     table$panel <- p
++     df_table_region <- rbind(df_table_region,table)
++     
++     # predict - country level change
++     yhat <- prediction(beta, data = df_new_data_yhat, calculate_se = TRUE)
++     yhat <- yhat %>%
++       select(fitted, se.fitted) %>%
++       rename(fit = fitted) %>%
++       mutate(lwr = fit - 1.96*se.fitted,
++              upr = fit + 1.96*se.fitted) %>%
++       select(-se.fitted)
++     yhat <- cbind(df_new_data_yhat,yhat)
++     yhat$geography <- r
++     yhat$panel <- p
++     df_yhat_region <- rbind(df_yhat_region,yhat)
++     
++     # margins
++     mfx <- summary(margins(beta,
++                            design = my_svy
++     ))
++     mfx$geography <- r
++     mfx$panel <- p
++     df_mfx_region <- rbind(df_mfx_region,mfx)
++   }  
++ }
+[1] "Continental"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Eastern"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Southern"
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] "Nordic"
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2019
+[1] 2008
+[1] 2009
+[1] 2010
+[1] 2011
+[1] "Anglophone"
+[1] 2009
+[1] 2010
+[1] 2011
+[1] 2012
+[1] 2013
+[1] 2014
+[1] 2015
+[1] 2016
+[1] 2017
+[1] 2018
+[1] 2008
+[1] 2019
+There were 50 or more warnings (use warnings() to see the first 50)
+> 
+> rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy,df_region,region,r)
+> 
+> # Save --------------------------------------------------------------
+> 
+> saveRDS(df_yhat_eu, file = paste0(results, "df_yhat_glm_contract_num_eu_wt.rds"))
+> saveRDS(df_yhat_region, file = paste0(results, "df_yhat_glm_contract_num_region_wt.rds"))
+> saveRDS(df_yhat_country, file = paste0(results, "df_yhat_glm_contract_num_country_wt.rds"))
+> 
+> saveRDS(df_table_eu, file = paste0(results, "df_table_glm_contract_num_eu_wt.rds"))
+> saveRDS(df_table_region, file = paste0(results, "df_table_glm_contract_num_region_wt.rds"))
+> saveRDS(df_table_country, file = paste0(results, "df_table_glm_contract_num_country_wt.rds"))
+> 
+> saveRDS(df_mfx_eu, file = paste0(results, "df_mfx_glm_contract_num_eu_wt.rds"))
+> saveRDS(df_mfx_region, file = paste0(results, "df_mfx_glm_contract_num_region_wt.rds"))
+> saveRDS(df_mfx_country, file = paste0(results, "df_mfx_glm_contract_num_country_wt.rds"))
+> 
+> beep()
+> 
+> proc.time()
+   user  system elapsed 
+159.573  10.071 191.180 

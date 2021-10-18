@@ -1,0 +1,325 @@
+
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Top commands ----
+> # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+> detachAllPackages <- function() {
++         basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
++         package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
++         package.list <- setdiff(package.list,basic.packages)
++         if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
++         
++ }
+> detachAllPackages()
+> 
+> rm(list=ls(all=TRUE))
+> 
+> # FOLDERS
+> setwd("/Users/jonathanlatner/Google Drive/")
+> # setwd("C:/Users/ba1ks6/Google Drive/")
+> 
+> data_files = "SECCOPA/projects/distribution_contyp/data_files/eu_silc/2_year_panel/"
+> 
+> # LIBRARY
+> library(tidyverse)
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.3.2     ✔ purrr   0.3.4
+✔ tibble  3.0.6     ✔ dplyr   1.0.4
+✔ tidyr   1.1.2     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.5.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+> library(car) #recode
+Loading required package: carData
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:dplyr’:
+
+    recode
+
+The following object is masked from ‘package:purrr’:
+
+    some
+
+> library(countrycode)
+> library(beepr)
+> 
+> # Load data ----
+> 
+> df_eu_silc <- readRDS(file = paste0(data_files,"df_eu_silc_filter.rds"))
+> 
+> # Clean data ----
+> 
+> df_eu_silc$country_name <- countrycode(df_eu_silc$country, 'genc2c', 'country.name')
+> 
+> df_eu_silc <- df_eu_silc %>%
++         rename(weight_long = weight_long_2) %>%
++         mutate(ftc = contyp-1) %>%
++         mutate(ftc = ifelse(empst == 0, yes = 0, no = ftc)) # if unemployed, then contract type == 0
+> 
+> # age
+> df_eu_silc$age_cat <- recode(df_eu_silc$age, "25:34 = 1; 35:44=2; 45:54=3")
+> 
+> # Count number of FTC and Employed ----
+> # control (i.e. ftc_num_c, c for control) for the fact that an individual with FTC in consecutive periods did or did not change jobs
+> # if an individual did have FTC in consecutive periods (ftc==1 & lag(ftc,1)==1), but did not change jobs (job_change == 2), then they do not have a new FTC
+> # ftc_num_sum_c is the sum of the number of unique ftc contracts
+> 
+> df_eu_silc <- df_eu_silc %>%
++         group_by(panel, country, pid) %>%
++         mutate(ftc_num = ifelse(ftc==1 & empst == 1, yes = 1, no = NA),
++                ftc_num_sum = sum(ftc_num, na.rm = TRUE),
++                ftc_num_c = ifelse(row_number() > 1 & ftc==1 & lag(ftc,1)==1 & job_change == 2, yes = 0, no = ftc_num),
++                ftc_num_sum_c = sum(ftc_num_c, na.rm = TRUE)
++         ) %>%
++         ungroup() %>%
++         arrange(panel, country, pid, year)
+> 
+> with(df_eu_silc,table(ftc_num_sum,ftc_num_sum_c, useNA = "ifany"))
+           ftc_num_sum_c
+ftc_num_sum       0       1       2
+          0 1612436       0       0
+          1       0  174984       0
+          2       0  105926   21120
+> 
+> select(df_eu_silc,country,panel,pid,year,ftc,job_change,ftc_num,ftc_num_c,ftc_num_sum,ftc_num_sum_c) %>% filter(ftc_num_sum_c != ftc_num_sum)
+# A tibble: 105,926 x 10
+   country panel       pid  year   ftc job_change ftc_num ftc_num_c ftc_num_sum
+   <fct>   <dbl>     <dbl> <dbl> <dbl>      <dbl>   <dbl>     <dbl>       <dbl>
+ 1 AT       2008  93610002  2006     1          1       1         1           2
+ 2 AT       2008  93610002  2007     1          2       1         0           2
+ 3 AT       2008  94210001  2006     1          1       1         1           2
+ 4 AT       2008  94210001  2007     1          2       1         0           2
+ 5 AT       2008  97870001  2005     1          2       1         1           2
+ 6 AT       2008  97870001  2006     1          2       1         0           2
+ 7 AT       2008 100930001  2005     1          2       1         1           2
+ 8 AT       2008 100930001  2006     1          2       1         0           2
+ 9 AT       2008 100930002  2005     1          2       1         1           2
+10 AT       2008 100930002  2006     1          2       1         0           2
+# … with 105,916 more rows, and 1 more variable: ftc_num_sum_c <dbl>
+> 
+> # Spells Duration of FTC ----
+> # if current job is FTC, but previous job is not FTC, then new job is started (start == 1)
+> # if current and previous job is FTC, but they did change jobs (job_change == 1), then new job is started (start == 1)
+> # otherwise no new job is started (start == 0)
+> # job spell is the cumsum of each new job start
+> # within each new job spell, calculate duration if FTC == 1
+> 
+> df_eu_silc <- df_eu_silc %>%
++         group_by(panel, country, pid) %>%
++         mutate(start = ifelse(ftc != lag(ftc) & row_number() > 1, yes = 1,
++                               ifelse(ftc == lag(ftc) & job_change == 1 & row_number() > 1, yes = 1, no = 0)),
++                spell = cumsum(start)) %>%
++         group_by(panel, country, pid, spell) %>%
++         mutate(ftc_dur = ifelse(ftc == 1, yes = cumsum(ftc), no = 0)) %>%
++         ungroup()
+> 
+> with(df_eu_silc,table(ftc_num_sum_c,ftc_dur))
+             ftc_dur
+ftc_num_sum_c       0       1       2
+            0 1612436       0       0
+            1   87492  141596   51822
+            2       0   21120       0
+> select(df_eu_silc,country,panel,pid,year,ftc,spell,job_change,ftc_dur,ftc_num_sum_c) %>% filter(ftc_num_sum_c==1&ftc_dur==2)
+# A tibble: 51,822 x 9
+   country panel       pid  year   ftc spell job_change ftc_dur ftc_num_sum_c
+   <fct>   <dbl>     <dbl> <dbl> <dbl> <dbl>      <dbl>   <dbl>         <dbl>
+ 1 AT       2008  93610002  2007     1     0          2       2             1
+ 2 AT       2008  94210001  2007     1     0          2       2             1
+ 3 AT       2008  97870001  2006     1     0          2       2             1
+ 4 AT       2008 100930001  2006     1     0          2       2             1
+ 5 AT       2008 100930002  2006     1     0          2       2             1
+ 6 AT       2008 121460001  2006     1     0          2       2             1
+ 7 AT       2008 122700001  2006     1     0          2       2             1
+ 8 AT       2008 127400001  2007     1     0          2       2             1
+ 9 AT       2008 130840001  2007     1     0          2       2             1
+10 AT       2008 137310002  2008     1     0          2       2             1
+# … with 51,812 more rows
+> 
+> # Clean variable names, recode values, etc. ----
+> 
+> # create dependent variables
+> df_eu_silc$ftc_ever <- recode(df_eu_silc$ftc_num_sum_c, "1:hi = 1")
+> df_eu_silc$ftc_num <- recode(df_eu_silc$ftc_num_sum_c, "2:hi = 2")
+> df_eu_silc$ftc_dur <- recode(df_eu_silc$ftc_dur, "2:hi = 2")
+> 
+> df_eu_silc <- df_eu_silc %>% 
++         mutate(edu_cat=isced_cat_2,
++                country = as.factor(as.character(country)),
++                country_name = as.factor(as.character(country_name)),
++                male = as.factor(male),
++                edu_cat = as.factor(edu_cat),
++                age_cat = as.factor(age_cat)) %>%
++         arrange(country, panel, pid, year)
+> 
+> df_eu_silc <- within(df_eu_silc, edu_cat <- relevel(edu_cat, ref = "2"))
+> df_eu_silc <- within(df_eu_silc, age_cat <- relevel(age_cat, ref = "2"))
+> 
+> # Code country/region ----
+> 
+> country_name <- c("Germany", "Switzerland", "Luxembourg", "Belgium", "Austria", "Netherlands", "France", 
++              "United Kingdom", "Ireland", 
++              "Malta", "Greece", "Italy", "Cyprus", "Portugal", "Spain", 
++              "Romania", "Poland", "Croatia", "Hungary", "Czechia", "Bulgaria", "Slovenia", "Slovakia", "Lithuania", "Estonia", "Latvia", "Serbia", "Turkey",
++              "Sweden", "Denmark", "Norway", "Finland", "Iceland")
+> region <- c("Continental", "Continental", "Continental", "Continental", "Continental", "Continental", "Continental", 
++             "Anglophone", "Anglophone", 
++             "Southern", "Southern", "Southern", "Southern", "Southern", "Southern", 
++             "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern",
++             "Nordic", "Nordic", "Nordic", "Nordic", "Nordic")
+> 
+> geography <- cbind(country_name, region)
+> 
+> df_eu_silc <- merge(df_eu_silc,geography) %>%
++         arrange(country, panel, pid, year)
+> 
+> rm(country_name, region, geography)
+> 
+> table(df_eu_silc$country_name, useNA = "ifany")
+
+       Austria        Belgium       Bulgaria        Croatia         Cyprus 
+         58410          57742          61192          48694          51336 
+       Czechia        Denmark        Estonia        Finland         France 
+         91940          16128          59314          41060         124600 
+        Greece        Hungary        Iceland        Ireland          Italy 
+         70530          86062          11372          25298         154822 
+        Latvia      Lithuania     Luxembourg          Malta    Netherlands 
+         52374          49574          56748          36162          59486 
+        Norway         Poland       Portugal        Romania         Serbia 
+         32924         123444          79916          70300          28626 
+      Slovakia       Slovenia          Spain         Sweden    Switzerland 
+         68240          66714         125228          29718          26680 
+United Kingdom 
+         49832 
+> table(df_eu_silc$region, useNA = "ifany")
+
+ Anglophone Continental     Eastern      Nordic    Southern 
+      75130      383666      806474      131202      517994 
+> with(df_eu_silc,table(country_name,region))
+                region
+country_name     Anglophone Continental Eastern Nordic Southern
+  Austria                 0       58410       0      0        0
+  Belgium                 0       57742       0      0        0
+  Bulgaria                0           0   61192      0        0
+  Croatia                 0           0   48694      0        0
+  Cyprus                  0           0       0      0    51336
+  Czechia                 0           0   91940      0        0
+  Denmark                 0           0       0  16128        0
+  Estonia                 0           0   59314      0        0
+  Finland                 0           0       0  41060        0
+  France                  0      124600       0      0        0
+  Greece                  0           0       0      0    70530
+  Hungary                 0           0   86062      0        0
+  Iceland                 0           0       0  11372        0
+  Ireland             25298           0       0      0        0
+  Italy                   0           0       0      0   154822
+  Latvia                  0           0   52374      0        0
+  Lithuania               0           0   49574      0        0
+  Luxembourg              0       56748       0      0        0
+  Malta                   0           0       0      0    36162
+  Netherlands             0       59486       0      0        0
+  Norway                  0           0       0  32924        0
+  Poland                  0           0  123444      0        0
+  Portugal                0           0       0      0    79916
+  Romania                 0           0   70300      0        0
+  Serbia                  0           0   28626      0        0
+  Slovakia                0           0   68240      0        0
+  Slovenia                0           0   66714      0        0
+  Spain                   0           0       0      0   125228
+  Sweden                  0           0       0  29718        0
+  Switzerland             0       26680       0      0        0
+  United Kingdom      49832           0       0      0        0
+> 
+> # Save descriptives data ----
+> # this dataset is necessary for do file: "04_descriptive_tables_country_panel_years.R"
+> saveRDS(df_eu_silc, file = paste0(data_files, "df_eu_silc_clean.rds"))
+> 
+> df_eu_silc <- readRDS(file = paste0(data_files,"df_eu_silc_clean.rds"))
+> with(df_eu_silc,table(panel,year))
+      year
+panel   2005  2006  2007  2008  2009  2010  2011  2012  2013  2014  2015  2016
+  2008 20781 42811 52913 30883     0     0     0     0     0     0     0     0
+  2009     0 22042 45983 51941 28000     0     0     0     0     0     0     0
+  2010     0     0 23199 45405 50892 28686     0     0     0     0     0     0
+  2011     0     0     0 22321 44848 54049 31522     0     0     0     0     0
+  2012     0     0     0     0 23027 48299 57685 32413     0     0     0     0
+  2013     0     0     0     0     0 22207 46569 55037 30675     0     0     0
+  2014     0     0     0     0     0     0 23149 48122 58427 33454     0     0
+  2015     0     0     0     0     0     0     0 22550 48635 58901 32816     0
+  2016     0     0     0     0     0     0     0     0 24005 49746 59652 33911
+  2017     0     0     0     0     0     0     0     0     0 23428 49660 63843
+  2018     0     0     0     0     0     0     0     0     0     0 25757 55573
+  2019     0     0     0     0     0     0     0     0     0     0     0 23999
+      year
+panel   2017  2018  2019
+  2008     0     0     0
+  2009     0     0     0
+  2010     0     0     0
+  2011     0     0     0
+  2012     0     0     0
+  2013     0     0     0
+  2014     0     0     0
+  2015     0     0     0
+  2016     0     0     0
+  2017 37611     0     0
+  2018 64507 34691     0
+  2019 47627 52921 29293
+> 
+> # Save number data (individual) ----
+> 
+> # Collapse panel data into cross sectional
+> 
+> df_eu_silc_xc <- df_eu_silc %>%
++         select(region, country, country_name, panel, pid, year, edu_cat, male, age_cat, ftc, ftc_ever, ftc_num, ftc_dur, weight_long) %>%
++         arrange(country, panel, pid, year) %>%
++         group_by(country, panel, pid) %>%
++         filter(row_number() == n()) %>%
++         ungroup()
+> 
+> df_eu_silc_xc <- droplevels(df_eu_silc_xc)
+> saveRDS(df_eu_silc_xc, file = paste0(data_files, "df_eu_silc_clean_xc.rds"))
+> 
+> # Save duration data (spell) ----
+> 
+> # Filter data 
+> # person-spell data for employed individuals
+> df_eu_silc_panel <- df_eu_silc %>%
++         filter(empst != 0) %>%
++         select(region, country, country_name, panel, pid, spell, year, edu_cat, male, age_cat, ftc, ftc_ever, ftc_num, ftc_dur, weight_long)
+> df_eu_silc_panel <- droplevels(df_eu_silc_panel)
+> 
+> # Save new data: This is necessary to create a temporary employment rate from panel data for comparison to LFS data
+> saveRDS(df_eu_silc_panel, file = paste0(data_files, "df_eu_silc_clean_panel_year.rds"))
+> 
+> # keep last observation per spell
+> df_eu_silc_panel <- df_eu_silc_panel %>%
++         group_by(country_name,panel,pid,spell) %>%
++         filter(row_number()==n()) %>%
++         ungroup()
+> 
+> saveRDS(df_eu_silc_panel, file = paste0(data_files, "df_eu_silc_clean_panel.rds"))
+> 
+> # beep()
+> 
+> 
+> proc.time()
+   user  system elapsed 
+268.810   3.782 274.725 

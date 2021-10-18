@@ -12,10 +12,10 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
+# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/"
-graphs = "graphs/eu_silc/"
 tables = "tables/eu_silc/"
 
 # LIBRARY
@@ -32,12 +32,11 @@ df_filter <- readRDS(file = paste0(data_files,"df_eu_silc_filter_steps.rds"))
 df_ever <- readRDS(file = paste0(data_files,"df_eu_silc_clean_xc.rds"))
 
 df_num <- df_ever %>%
-  filter(ftc_ever_c > 0)
+  filter(ftc_num > 0)
 
 df_dur <- readRDS(file = paste0(data_files,"df_eu_silc_clean_panel.rds"))
 df_dur <- df_dur %>%
-  filter(ftc_duration > 0)
-
+  filter(ftc_dur > 0)
 
 # Clean data--------------------------------------------------------------
 df_filter <- df_filter %>%
@@ -46,8 +45,6 @@ df_filter <- df_filter %>%
         group_by(step) %>%
         mutate(total_unique = sum(unique_n)) %>%
         ungroup()
-
-sprintf(AME, fmt = '%#.3f')
 
 df_filter <- df_filter %>%
   group_by(step) %>%
@@ -88,6 +85,8 @@ df_table <- rbind(df_table, df_dataset_a,df_dataset_b,df_dataset_c)
 
 rm(df_filter, df_dataset_a,df_dataset_b,df_dataset_c,df_dur,df_ever,df_num)
 
+df_table
+
 # VARIABLE LABLES
 
 columns <- c("[-1.8ex]
@@ -117,7 +116,7 @@ t
 
 print(t, 
       sanitize.colnames.function = identity, 
-      file = paste0(tables,"descriptives_tables_steps_2.tex"),
+      file = paste0(tables,"descriptives_tables_steps.tex"),
       include.rownames = FALSE, 
       include.colnames = FALSE,
       sanitize.text.function = identity,

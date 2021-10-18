@@ -12,14 +12,15 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
+# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/"
 results = "results/eu_silc/"
 
 # LIBRARY
 library(dplyr)
-library(car)
+library(car) # recode
 library(margins)
 library(broom) # tidy
 library(prediction)
@@ -30,59 +31,98 @@ options(scipen=999)
 # Load data --------------------------------------------------------------
 
 df_eu_silc <- readRDS(file = paste0(data_files,"df_eu_silc_clean_panel.rds"))
-table(df_eu_silc$panel)
-
-df_eu_silc <- df_eu_silc %>%
-  filter(ftc_duration > 0)
 
 # Clean data  -----------------------------------------
 
-df_eu_silc <- within(df_eu_silc, edu_cat <- relevel(edu_cat, ref = "2"))
-df_eu_silc <- within(df_eu_silc, age_cat <- relevel(age_cat, ref = "2"))
-
-#tranform ftc_duration into categorical dummy variables
-df_eu_silc$duration <- recode(df_eu_silc$ftc_duration, "1=0;2:3=1")
-
-table(df_eu_silc$ftc_duration,useNA = "ifany")
-table(df_eu_silc$duration,useNA = "ifany")
-
+# Condition on ever having a temporary employment contract
 df_eu_silc <- df_eu_silc %>%
-  select(country_name, panel, year, edu_cat, male, age_cat, matches("ftc_c"), weight_long_4, duration) %>%
-  rename(country=country_name)
+  filter(ftc_dur > 0)
 
-df_eu_silc <- droplevels(df_eu_silc)
+table(df_eu_silc$ftc_dur)
 
-country <- c("Germany", "Switzerland", "Luxembourg", "Belgium", "Austria", "Netherlands", "France", 
-             "United Kingdom", "Ireland", 
-             "Malta", "Greece", "Italy", "Cyprus", "Portugal", "Spain", 
-             "Romania", "Poland", "Croatia", "Hungary", "Czechia", "Bulgaria", "Slovenia", "Slovakia", "Lithuania", "Estonia", "Latvia", "Serbia", "Turkey",
-             "Sweden", "Denmark", "Norway", "Finland", "Iceland")
-country_code <- c("DE", "CH", "LU", "BE", "AT", "NL", "FR", 
-                  "GB", "IE", 
-                  "MT", "GR", "IT", "CY", "PT", "ES", 
-                  "RO", "PL", "HR", "HU", "CZ", "BG", "SI", "SK", "LT", "EE", "LV", "RS", "TK",
-                  "SE", "DK", "NO", "FI", "IS")
-region <- c("Continental", "Continental", "Continental", "Continental", "Continental", "Continental", "Continental", 
-            "Anglophone", "Anglophone", 
-            "Southern", "Southern", "Southern", "Southern", "Southern", "Southern", 
-            "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern", "Eastern",
-            "Nordic", "Nordic", "Nordic", "Nordic", "Nordic")
-
-geography <- cbind(country, country_code, region)
-
-df_eu_silc <- merge(df_eu_silc,geography)
-
-rm(country, country_code, region, geography)
-
-table(df_eu_silc$country, useNA = "ifany")
-table(df_eu_silc$region, useNA = "ifany")
-
-# Sample --------------------------------------------------------------
-set.seed(1234)
-
-n <- c(2)
+#tranform ftc_dur into categorical dummy variables
+df_eu_silc$ftc_dur <- recode(df_eu_silc$ftc_dur, "1=0;2:hi=1")
 
 # LPM --------------------------------------------------------------
+
+# Country
+country <- unique(sort(df_eu_silc$country_name))
+country <- droplevels(country)
+df_table_country = data.frame() # output
+df_yhat_country = data.frame() # predict
+df_mfx_country = data.frame() # mfx
+for(c in country) {
+  df_country <- filter(df_eu_silc, country_name == c)
+  print(c)
+  
+  t <- data.frame(with(df_country,table(panel)))
+  t$country <- c
+  
+  # It is necessary to drop a few country, years because model does not run due to small number of observations that combine age,edu,gender
+  t <- t %>%
+    mutate(test = ifelse((country == "Denmark" & (panel == 2014|panel == 2018))
+                         | (country == "Estonia" & (panel == 2008|panel == 2014|panel==2019))
+                         | (country == "Ireland" & (panel == 2014))
+                         | (country == "Latvia" & (panel == 2015|panel == 2017|panel == 2018|panel==2019))
+                         | (country == "Malta" & (panel == 2009))
+                         | (country == "Sweden" & (panel == 2014|panel==2016))
+                         | (country == "United Kingdom" & (panel == 2012|panel==2013))
+                         | (country == "Norway" & (panel==2015|panel==2017))
+                         ,
+                         yes = 0, no = 1)) %>%
+    filter(test == 1) %>%
+    mutate(panel = as.numeric(as.character(panel)))
+  t <- droplevels(t)
+  
+  panel <- unique(sort(t$panel))
+  for(p in panel) {
+    df_panel <- filter(df_country, panel == p)
+    print(p)
+    
+    df_new_data_yhat <- data.frame(
+      unique(
+        data.frame(
+          male = "0",
+          age_cat = "2",
+          edu_cat = "2")), 
+      row.names = NULL)
+    
+    my_svy <- svydesign(data = df_panel, 
+                        ids = ~1, # no clusters 
+                        weights =~ weight_long)
+    beta <- svyglm(ftc_dur ~ male + age_cat + edu_cat, my_svy, family = "binomial")
+    
+    # summary table
+    table <- tidy(beta)
+    table$geography <- c
+    table$panel <- p
+    df_table_country <- rbind(df_table_country,table)
+    
+    # predict - country level change
+    yhat <- prediction(beta, data = df_new_data_yhat, calculate_se = TRUE)
+    yhat <- yhat %>%
+      select(fitted, se.fitted) %>%
+      rename(fit = fitted) %>%
+      mutate(lwr = fit - 1.96*se.fitted,
+             upr = fit + 1.96*se.fitted) %>%
+      select(-se.fitted)
+    yhat <- cbind(df_new_data_yhat,yhat)
+    yhat$geography <- c
+    yhat$panel <- p
+    df_yhat_country <- rbind(df_yhat_country,yhat)
+    
+    # margins
+    mfx <- summary(margins(beta,
+                           design = my_svy
+    ))
+    mfx$geography <- c
+    mfx$panel <- p
+    df_mfx_country <- rbind(df_mfx_country,mfx)
+  }
+}
+
+rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy,t,df_country,c,country)
+
 
 # EU
 df_table_eu = data.frame() # output
@@ -102,12 +142,11 @@ for(p in panel) {
   
   my_svy <- svydesign(data = df_panel, 
                       ids = ~1, # no clusters 
-                      weights =~ weight_long_4)
-  beta <- svyglm(duration ~ male + age_cat + edu_cat, my_svy, family = "binomial")
+                      weights =~ weight_long)
+  beta <- svyglm(ftc_dur ~ male + age_cat + edu_cat, my_svy, family = "binomial")
   
   # summary table
   table <- tidy(beta)
-  table$num <- n
   table$geography <- "EU-SILC"
   table$panel <- p
   df_table_eu <- rbind(df_table_eu,table)
@@ -121,7 +160,6 @@ for(p in panel) {
            upr = fit + 1.96*se.fitted) %>%
     select(-se.fitted)
   yhat <- cbind(df_new_data_yhat,yhat)
-  yhat$num <- n
   yhat$panel <- p
   yhat$geography <- "EU-SILC"
   yhat
@@ -132,7 +170,6 @@ for(p in panel) {
   mfx <- summary(margins(beta,
                          design = my_svy
   ))
-  mfx$num <- n
   mfx$panel <- p
   mfx$geography <- "EU-SILC"
   df_mfx_eu <- rbind(df_mfx_eu,mfx)
@@ -165,12 +202,11 @@ for(r in region) {
     
     my_svy <- svydesign(data = df_panel, 
                         ids = ~1, # no clusters 
-                        weights =~ weight_long_4)
-    beta <- svyglm(duration ~ male + age_cat + edu_cat, my_svy, family = "binomial")
+                        weights =~ weight_long)
+    beta <- svyglm(ftc_dur ~ male + age_cat + edu_cat, my_svy, family = "binomial")
   
     # summary table
     table <- tidy(beta)
-    table$num <- n
     table$geography <- r
     table$panel <- p
     df_table_region <- rbind(df_table_region,table)
@@ -184,7 +220,6 @@ for(r in region) {
              upr = fit + 1.96*se.fitted) %>%
       select(-se.fitted)
     yhat <- cbind(df_new_data_yhat,yhat)
-    yhat$num <- n
     yhat$geography <- r
     yhat$panel <- p
     df_yhat_region <- rbind(df_yhat_region,yhat)
@@ -193,106 +228,26 @@ for(r in region) {
     mfx <- summary(margins(beta,
                            design = my_svy
     ))
-    mfx$num <- n
     mfx$geography <- r
     mfx$panel <- p
     df_mfx_region <- rbind(df_mfx_region,mfx)
   }  
 }
 
-rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy)
-
-# Country
-country <- unique(df_eu_silc$country)
-country <- droplevels(country)
-df_table_country = data.frame() # output
-df_yhat_country = data.frame() # predict
-df_mfx_country = data.frame() # mfx
-for(c in country) {
-  df_country <- filter(df_eu_silc, country == c)
-  print(c)
-  
-  t <- data.frame(with(df_country,table(panel,duration)))
-  t$country <- c
-  
-  t <- t %>%
-    mutate(test = ifelse((country == "Denmark" & (panel == 2014|panel == 2018))
-                         | (country == "Estonia" & (panel == 2008|panel == 2014|panel==2019))
-                         | (country == "Ireland" & (panel == 2014))
-                         | (country == "Latvia" & (panel == 2015|panel == 2017|panel == 2018|panel==2019))
-                         | (country == "Malta" & (panel == 2009))
-                         | (country == "Sweden" & (panel == 2014|panel==2016))
-                         | (country == "United Kingdom" & (panel == 2012|panel==2013))
-                         ,
-                         yes = 0, no = 1)) %>%
-    filter(test == 1) %>%
-    mutate(panel = as.numeric(as.character(panel)))
-  t <- droplevels(t)
-
-  panel <- unique(t$panel)
-  for(p in panel) {
-    df_panel <- filter(df_country, panel == p)
-    print(p)
-    
-    df_new_data_yhat <- data.frame(
-      unique(
-        data.frame(
-          male = "0",
-          age_cat = "2",
-          edu_cat = "2")), 
-      row.names = NULL)
-    
-    my_svy <- svydesign(data = df_panel, 
-                        ids = ~1, # no clusters 
-                        weights =~ weight_long_4)
-    beta <- svyglm(duration ~ male + age_cat + edu_cat, my_svy, family = "binomial")
-    
-    # summary table
-    table <- tidy(beta)
-    table$num <- n
-    table$geography <- c
-    table$panel <- p
-    df_table_country <- rbind(df_table_country,table)
-    
-    # predict - country level change
-    yhat <- prediction(beta, data = df_new_data_yhat, calculate_se = TRUE)
-    yhat <- yhat %>%
-      select(fitted, se.fitted) %>%
-      rename(fit = fitted) %>%
-      mutate(lwr = fit - 1.96*se.fitted,
-             upr = fit + 1.96*se.fitted) %>%
-      select(-se.fitted)
-    yhat <- cbind(df_new_data_yhat,yhat)
-    yhat$num <- n
-    yhat$geography <- c
-    yhat$panel <- p
-    df_yhat_country <- rbind(df_yhat_country,yhat)
-    
-    # margins
-    mfx <- summary(margins(beta,
-                           design = my_svy
-    ))
-    mfx$num <- n
-    mfx$geography <- c
-    mfx$panel <- p
-    df_mfx_country <- rbind(df_mfx_country,mfx)
-  }
-}
-
-rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy)
+rm(beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,my_svy,df_region,region,r)
 
 # Save --------------------------------------------------------------
 
-saveRDS(df_yhat_eu, file = paste0(results, "df_yhat_glm_contract_dur_eu_wt.rds"))
-saveRDS(df_yhat_region, file = paste0(results, "df_yhat_glm_contract_dur_region_wt.rds"))
-saveRDS(df_yhat_country, file = paste0(results, "df_yhat_glm_contract_dur_country_wt.rds"))
+saveRDS(df_yhat_eu, file = paste0(results, "df_yhat_glm_dur_eu_wt.rds"))
+saveRDS(df_yhat_region, file = paste0(results, "df_yhat_glm_dur_region_wt.rds"))
+saveRDS(df_yhat_country, file = paste0(results, "df_yhat_glm_dur_country_wt.rds"))
 
-saveRDS(df_table_eu, file = paste0(results, "df_table_glm_contract_dur_eu_wt.rds"))
-saveRDS(df_table_region, file = paste0(results, "df_table_glm_contract_dur_region_wt.rds"))
-saveRDS(df_table_country, file = paste0(results, "df_table_glm_contract_dur_country_wt.rds"))
+saveRDS(df_table_eu, file = paste0(results, "df_table_glm_dur_eu_wt.rds"))
+saveRDS(df_table_region, file = paste0(results, "df_table_glm_dur_region_wt.rds"))
+saveRDS(df_table_country, file = paste0(results, "df_table_glm_dur_country_wt.rds"))
 
-saveRDS(df_mfx_eu, file = paste0(results, "df_mfx_glm_contract_dur_eu_wt.rds"))
-saveRDS(df_mfx_region, file = paste0(results, "df_mfx_glm_contract_dur_region_wt.rds"))
-saveRDS(df_mfx_country, file = paste0(results, "df_mfx_glm_contract_dur_country_wt.rds"))
+saveRDS(df_mfx_eu, file = paste0(results, "df_mfx_glm_dur_eu_wt.rds"))
+saveRDS(df_mfx_region, file = paste0(results, "df_mfx_glm_dur_region_wt.rds"))
+saveRDS(df_mfx_country, file = paste0(results, "df_mfx_glm_dur_country_wt.rds"))
 
 # beep()

@@ -1,0 +1,2 @@
+load("/Volumes/GoogleDrive/My Drive/SECCOPA/projects/distribution_contyp/results/eu_silc/2_year_panel/df_mfx_glm_contract_dur_region_wt.rds")
+load("/Volumes/GoogleDrive/My Drive/SECCOPA/projects/distribution_contyp/results/eu_silc/2_year_panel/df_yhat_glm_contract_num_country_wt.rds")
