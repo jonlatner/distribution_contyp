@@ -12,10 +12,17 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
+<<<<<<< HEAD
 setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
 # setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/"
+=======
+setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+
+data_files = "data_files/eu_silc/"
+graphs = "graphs/eu_silc/"
+>>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 tables = "tables/eu_silc/"
 
 # LIBRARY
@@ -32,11 +39,20 @@ df_filter <- readRDS(file = paste0(data_files,"df_eu_silc_filter_steps.rds"))
 df_ever <- readRDS(file = paste0(data_files,"df_eu_silc_clean_xc.rds"))
 
 df_num <- df_ever %>%
+<<<<<<< HEAD
   filter(ftc_num > 0)
 
 df_dur <- readRDS(file = paste0(data_files,"df_eu_silc_clean_panel.rds"))
 df_dur <- df_dur %>%
   filter(ftc_dur > 0)
+=======
+  filter(ftc_ever_c > 0)
+
+df_dur <- readRDS(file = paste0(data_files,"df_eu_silc_clean_panel.rds"))
+df_dur <- df_dur %>%
+  filter(ftc_duration > 0)
+
+>>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 # Clean data--------------------------------------------------------------
 df_filter <- df_filter %>%
@@ -46,6 +62,11 @@ df_filter <- df_filter %>%
         mutate(total_unique = sum(unique_n)) %>%
         ungroup()
 
+<<<<<<< HEAD
+=======
+sprintf(AME, fmt = '%#.3f')
+
+>>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_filter <- df_filter %>%
   group_by(step) %>%
   summarise(country_panel = max(row_number()),
@@ -85,8 +106,11 @@ df_table <- rbind(df_table, df_dataset_a,df_dataset_b,df_dataset_c)
 
 rm(df_filter, df_dataset_a,df_dataset_b,df_dataset_c,df_dur,df_ever,df_num)
 
+<<<<<<< HEAD
 df_table
 
+=======
+>>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 # VARIABLE LABLES
 
 columns <- c("[-1.8ex]
@@ -116,7 +140,11 @@ t
 
 print(t, 
       sanitize.colnames.function = identity, 
+<<<<<<< HEAD
       file = paste0(tables,"descriptives_tables_steps.tex"),
+=======
+      file = paste0(tables,"descriptives_tables_steps_2.tex"),
+>>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
       include.rownames = FALSE, 
       include.colnames = FALSE,
       sanitize.text.function = identity,
