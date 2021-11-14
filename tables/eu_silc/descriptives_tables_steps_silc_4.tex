@@ -1,0 +1,25 @@
+\begin{tabular}{l>{\raggedright\arraybackslash}p{1in}ll>{\raggedright\arraybackslash}p{4in}}
+   \\[-1.8ex]\hline \\ 
+ [-1.8ex]
+\multicolumn{1}{l}{Step} & 
+\multicolumn{1}{>{\raggedright\arraybackslash}p{1in}}{Country, panel periods} &
+\multicolumn{1}{l}{Observations} & 
+\multicolumn{1}{l}{\% $\Delta$} & 
+\multicolumn{1}{l}{Notes} 
+\\  
+
+ \hline
+0 & 377 & 14.724.687 &  & Raw data \\ 
+  1 & 346 & 13.502.253 & -8\% & Country panel filters: Drop 2007 panel period.  Every panel period can only have four years.  Each country, panel, year must have non-missing temporary employment rate $>$ 0 \\ 
+  2 & 346 & 5.234.565 & -61\% & Individual filters: prime age (25 - 54), active labor market participation (employed or unemployed), personal weight $>$ 0 \\ 
+  3 & 346 & 4.887.435 & -7\% & Must be employed at least once \\ 
+  4 & 346 & 3.675.604 & -25\% & Case-wise deletion of missing variables on education, gender, age, and contract type \\ 
+  5 & 331 & 1.071.384 & -71\% & Individuals in each year of 4 year panel period \\ 
+  6 & 325 & 1.058.840 & -1\% & Must have 4 year longitudinal weight (`Main dataset') \\ 
+   \hline 
+7 & Dataset \emph{A} & 264.710 &  & Main data:  One observation per individual, panel wave (ever) \\ 
+  8 & Dataset \emph{B} & 48.940 &  & Dataset \emph{A}:$|>= 1$ temporary contract (number) \\ 
+  9 & Dataset \emph{C} & 59.582 &  & Main data:$|>= 1$ temporary contract, one observation per spell, panel wave (duration) \\ 
+   \hline 
+ \hline 
+\end{tabular}
