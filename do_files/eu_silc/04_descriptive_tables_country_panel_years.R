@@ -12,17 +12,10 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-<<<<<<< HEAD
 setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
 # setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/"
-=======
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
-
-data_files = "data_files/eu_silc/"
-graphs = "graphs/eu_silc/"
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 tables = "tables/eu_silc/"
 
 # LIBRARY

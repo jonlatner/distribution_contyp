@@ -12,12 +12,8 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-<<<<<<< HEAD
 setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
 # setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
-=======
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 data_files = "data_files/eu_silc/"
 
@@ -37,10 +33,6 @@ step0 <- data.frame(with(df_eu_silc_0, table(country,panel)))
 step0 <- filter(step0, Freq>0) %>%
         arrange(panel,country)  %>%
         mutate(total = sum(Freq))
-<<<<<<< HEAD
-=======
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_unique <- df_eu_silc_0 %>%
         select(country,panel,pid) %>%
         group_by(country,panel,pid) %>%
@@ -48,10 +40,6 @@ df_unique <- df_eu_silc_0 %>%
         group_by(country,panel) %>%
         tally() %>%
         ungroup()
-<<<<<<< HEAD
-=======
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 step0 <- merge(step0,df_unique) %>%
         mutate(step = 0)
 head(step0)
@@ -132,15 +120,8 @@ df_unique <- df_eu_silc_1 %>%
         group_by(country,panel) %>%
         tally() %>%
         ungroup()
-<<<<<<< HEAD
 step1 <- merge(step1,df_unique) %>%
         mutate(step = 1)
-=======
-
-step1 <- merge(step1,df_unique) %>%
-        mutate(step = 1)
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 head(step1)
 
 # step 2: Individual-level filters -----------------------------------------
@@ -154,7 +135,6 @@ head(step1)
 #         arrange(country,pid,year,panel,weight_personal_base)
 # table(df_base_weight$year)
 
-<<<<<<< HEAD
 # for some reason, in NO, if panel>=2010, only last observation in panel period has weight_personal_base>0
 # therefore, to keep a 4 year panel, we weight these to 1
 # df_base_weight <- df_eu_silc_1 %>%
@@ -175,11 +155,6 @@ df_eu_silc_2 <- df_eu_silc_1 %>%
         mutate(age = year - birthy) %>%
         mutate(weight_personal_base=ifelse(country == "NL" & weight_personal_base == 0 & (panel==2016|panel==2017|panel==2018|panel==2019), yes = 1, no = weight_personal_base)) %>%
         mutate(weight_personal_base=ifelse(country == "NO" & weight_personal_base == 0 & (panel>=2010), yes = 1, no = weight_personal_base)) %>%
-=======
-df_eu_silc_2 <- df_eu_silc_1 %>%
-        mutate(age = year - birthy) %>%
-        mutate(weight_personal_base=ifelse(country == "NL" & weight_personal_base == 0 & (panel==2016|panel==2017|panel==2018|panel==2019), yes = 1, no = weight_personal_base)) %>%
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
         filter(weight_personal_base>0) %>% # remove duplicates
         filter(age >= 25 & age < 55) %>%
         select(country, pid, year, weight_long_4, everything()) %>%
@@ -198,13 +173,7 @@ df_eu_silc_2$empst_2_new <- recode(df_eu_silc_2$empst_2, "c(1,3)=1; c(2,4)=2; 5=
 # Recode 1 = employed FT; 2 = employed PT; 0 = unemployed; 3 = not in labor force (NILF) 
 
 df_empst_2009_2012 <- df_eu_silc_2 %>%
-<<<<<<< HEAD
         filter(panel > 2008 & panel < 2013) %>%
-=======
-        filter(panel > 2008 & panel < 2013,
-               # country == "PL",
-               ) %>%
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
         select(country,panel,pid,year,matches("empst")) %>% 
         mutate(empst_1_new = ifelse(empst_1_f==-5, yes = empst_2_new, # if old indicator says to do so, then replace old with new variable 
                                     ifelse(empst_1_f == 1, yes = empst_1_new, no = NA)), # else use old variable
@@ -439,12 +408,7 @@ df_eu_silc_7 <- df_eu_silc_6 %>%
 
 saveRDS(df_eu_silc_7, file = paste0(data_files, "df_eu_silc_filter.rds"))
 
-<<<<<<< HEAD
 # beep()
-=======
-beep()
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 head(step0) # raw data
 head(step1) # "Country panel filters: Every panel period can only have four years.  Each country, panel, year must have non-missing temporary employment rate $>$ 0.  Each country must be in at least 3 periods (i.e. trend)."
 head(step2) # "Individual filters: prime age (25 - 54), active labor market participation (employed or unemployed), personal weight $>$ 0"
@@ -452,10 +416,6 @@ head(step3) # "Must be employed at least once"
 head(step4) # "Case-wise deletion of missing variables on education, gender, age, and contract type"
 head(step5) # "Individuals in each year of 4 year panel period"
 head(step6) # "Must have 4 year longitudinal weight"
-<<<<<<< HEAD
-=======
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_filter_steps <- rbind(step0,step1,step2,step3,step4,step5,step6)
 saveRDS(df_filter_steps, file = paste0(data_files, "df_eu_silc_filter_steps.rds"))
 

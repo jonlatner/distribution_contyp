@@ -12,25 +12,15 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-<<<<<<< HEAD
 setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
 # setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
 graphs = "graphs/eu_silc/"
 results = "results/eu_silc/"
-=======
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
-
-data_files = "data_files/eu_silc/"
-results = "results/eu_silc/"
-graphs = "graphs/eu_silc/"
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 # LIBRARY
 library(tidyverse)
-library(beepr)
 library(forcats) #fct_reorder
-library(broom) # tidy
 
 options(scipen=999)
 
@@ -42,19 +32,11 @@ df_yhat_eu_ever <- readRDS(file = paste0(results,"df_yhat_glm_ever_eu_wt.rds"))
 df_yhat_region_ever <- readRDS(file = paste0(results,"df_yhat_glm_ever_region_wt.rds"))
 df_yhat_country_ever <- readRDS(file = paste0(results,"df_yhat_glm_ever_country_wt.rds"))
 
-<<<<<<< HEAD
-=======
-df_table_eu_ever <- readRDS(file = paste0(results,"df_table_glm_ever_eu_wt.rds"))
-df_table_region_ever <- readRDS(file = paste0(results,"df_table_glm_ever_region_wt.rds"))
-df_table_country_ever <- readRDS(file = paste0(results,"df_table_glm_ever_country_wt.rds"))
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_mfx_eu_ever <- readRDS(file = paste0(results,"df_mfx_glm_ever_eu_wt.rds"))
 df_mfx_region_ever <- readRDS(file = paste0(results,"df_mfx_glm_ever_region_wt.rds"))
 df_mfx_country_ever <- readRDS(file = paste0(results,"df_mfx_glm_ever_country_wt.rds"))
 
 # single contract
-<<<<<<< HEAD
 df_yhat_eu_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_num_eu_wt.rds"))
 df_yhat_region_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_num_region_wt.rds"))
 df_yhat_country_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_num_country_wt.rds"))
@@ -71,32 +53,6 @@ df_yhat_country_contract_dur <- readRDS(file = paste0(results,"df_yhat_glm_dur_c
 df_mfx_eu_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_dur_eu_wt.rds"))
 df_mfx_region_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_dur_region_wt.rds"))
 df_mfx_country_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_dur_country_wt.rds"))
-=======
-df_yhat_eu_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_contract_num_eu_wt.rds"))
-df_yhat_region_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_contract_num_region_wt.rds"))
-df_yhat_country_contract_num <- readRDS(file = paste0(results,"df_yhat_glm_contract_num_country_wt.rds"))
-
-df_table_eu_contract_num <- readRDS(file = paste0(results,"df_table_glm_contract_num_eu_wt.rds"))
-df_table_region_contract_num <- readRDS(file = paste0(results,"df_table_glm_contract_num_region_wt.rds"))
-df_table_country_contract_num <- readRDS(file = paste0(results,"df_table_glm_contract_num_country_wt.rds"))
-
-df_mfx_eu_contract_num <- readRDS(file = paste0(results,"df_mfx_glm_contract_num_eu_wt.rds"))
-df_mfx_region_contract_num <- readRDS(file = paste0(results,"df_mfx_glm_contract_num_region_wt.rds"))
-df_mfx_country_contract_num <- readRDS(file = paste0(results,"df_mfx_glm_contract_num_country_wt.rds"))
-
-# multi-year 
-df_yhat_eu_contract_dur <- readRDS(file = paste0(results,"df_yhat_glm_contract_dur_eu_wt.rds"))
-df_yhat_region_contract_dur <- readRDS(file = paste0(results,"df_yhat_glm_contract_dur_region_wt.rds"))
-df_yhat_country_contract_dur <- readRDS(file = paste0(results,"df_yhat_glm_contract_dur_country_wt.rds"))
-
-df_table_eu_contract_dur <- readRDS(file = paste0(results,"df_table_glm_contract_dur_eu_wt.rds"))
-df_table_region_contract_dur <- readRDS(file = paste0(results,"df_table_glm_contract_dur_region_wt.rds"))
-df_table_country_contract_dur <- readRDS(file = paste0(results,"df_table_glm_contract_dur_country_wt.rds"))
-
-df_mfx_eu_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_contract_dur_eu_wt.rds"))
-df_mfx_region_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_contract_dur_region_wt.rds"))
-df_mfx_country_contract_dur <- readRDS(file = paste0(results,"df_mfx_glm_contract_dur_country_wt.rds"))
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 # region
 country <- c("Germany", "Switzerland", "Luxembourg", "Belgium", "Austria", "Netherlands", "France", 
@@ -136,22 +92,15 @@ df_mfx_region_ever <- df_mfx_region_ever %>%
 df_mfx_country_ever <- df_mfx_country_ever %>%
         rename(country=geography) %>%
         mutate(geography = "Country")
-<<<<<<< HEAD
 
 df_mfx_country_ever <- merge(df_mfx_country_ever,geography)
 
-=======
-df_mfx_country_ever <- merge(df_mfx_country_ever,geography)
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_mfx_country_ever <- df_mfx_country_ever %>%
         mutate(country = as.factor(country),
                geography = as.factor(geography),
                region = as.factor(region))
 
-<<<<<<< HEAD
 # Clean (yhat) 
-=======
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_yhat_eu_ever <- df_yhat_eu_ever %>%
         mutate(region = "EU-SILC",
                geography = "Region",
@@ -171,22 +120,14 @@ df_yhat_region_ever <- df_yhat_region_ever %>%
 df_yhat_country_ever <- df_yhat_country_ever %>%
         rename(country=geography) %>%
         mutate(geography = "Country")
-<<<<<<< HEAD
 
 df_yhat_country_ever <- merge(df_yhat_country_ever,geography)
 
-=======
-df_yhat_country_ever <- merge(df_yhat_country_ever,geography)
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 df_yhat_country_ever <- df_yhat_country_ever %>%
         mutate(country = as.factor(country),
                geography = as.factor(geography),
                region = as.factor(region)) %>%
-<<<<<<< HEAD
         arrange(country,panel)
-=======
-        arrange(country,num,panel)
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 
 # Clean contract_num contracts ----
@@ -244,11 +185,7 @@ df_yhat_country_contract_num <- df_yhat_country_contract_num %>%
         mutate(country = as.factor(country),
                geography = as.factor(geography),
                region = as.factor(region)) %>%
-<<<<<<< HEAD
         arrange(country,panel)
-=======
-        arrange(country,num,panel)
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 
 # Clean contract_dur contracts ----
@@ -307,7 +244,6 @@ df_yhat_country_contract_dur <- df_yhat_country_contract_dur %>%
         mutate(country = as.factor(country),
                geography = as.factor(geography),
                region = as.factor(region)) %>%
-<<<<<<< HEAD
         arrange(country,panel)
 
 # Prepare graphing data ----
@@ -321,16 +257,6 @@ df_yhat_dur$type <- 3
 
 df_graph_yhat <- rbind(df_yhat_ever,df_yhat_num,df_yhat_dur)
 rm(df_yhat_ever,df_yhat_num,df_yhat_dur)
-=======
-        arrange(country,num,panel)
-
-
-# Graph yhat ----
-
-df_graph_yhat <- bind_rows(df_yhat_eu_ever, df_yhat_region_ever, df_yhat_country_ever,
-                           df_yhat_eu_contract_num, df_yhat_region_contract_num, df_yhat_country_contract_num,
-                           df_yhat_eu_contract_dur, df_yhat_region_contract_dur, df_yhat_country_contract_dur)
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 df_graph_yhat$geography <- factor(df_graph_yhat$geography,
                                   levels = c("Country","Region"))
@@ -339,12 +265,8 @@ df_graph_yhat <- df_graph_yhat %>%
         select(-male,-age_cat,-edu_cat) %>%
         arrange(num,geography,region,country,panel)
 
-<<<<<<< HEAD
 df_graph_yhat$type <- factor(df_graph_yhat$type, 
                              labels=c("Ever (Ref: Never)", "Multiple contracts (Ref: Single)", "Multiple year (Ref: Single)"))
-=======
-df_graph_yhat$num <- factor(df_graph_yhat$num, labels=c("Ever (Ref: Never)", "Multiple contracts (Ref: Single)", "Multiple year (Ref: Single)"))
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 
 df_graph_yhat$country <- fct_relevel(df_graph_yhat$country, "Anglophone", after = Inf) # forcats
 df_graph_yhat$country <- fct_relevel(df_graph_yhat$country, "Eastern", after = Inf) # forcats
@@ -356,7 +278,6 @@ df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "Region", after 
 
 # Graph yhat ever ----
 
-<<<<<<< HEAD
 df_graph_yhat_ever <- df_graph_yhat %>%
         filter(type == "Ever (Ref: Never)")
 
@@ -365,16 +286,6 @@ df_graph_yhat_region <- df_graph_yhat_ever %>%
 df_graph_yhat_region <- droplevels(df_graph_yhat_region)
 
 ggplot(data = df_graph_yhat_ever, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
-=======
-df_graph_yhat_1 <- df_graph_yhat %>%
-        filter(num == "Ever (Ref: Never)")
-
-df_graph_yhat_region <- df_graph_yhat_1 %>%
-        filter(geography == "Region")
-df_graph_yhat_region <- droplevels(df_graph_yhat_region)
-
-ggplot(data = df_graph_yhat_1, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
         facet_grid(num~region) + 
         scale_y_continuous(breaks = c(seq(0, 1, by = .25)), limits = c(-.1, 1)) +
         scale_x_continuous(breaks = c(2008,2013,2019), limits = c(2006, 2021)) +
@@ -412,7 +323,6 @@ ggsave(filename = paste0(graphs,"graph_eu_silc_glm_yhat_ever_presentation.pdf"),
 
 # Graph yhat number ----
 
-<<<<<<< HEAD
 df_graph_yhat_num <- df_graph_yhat %>%
         filter(type == "Multiple contracts (Ref: Single)")
 
@@ -421,16 +331,6 @@ df_graph_yhat_region <- df_graph_yhat_num %>%
 df_graph_yhat_region <- droplevels(df_graph_yhat_region)
 
 ggplot(data = df_graph_yhat_num, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
-=======
-df_graph_yhat_1 <- df_graph_yhat %>%
-        filter(num == "Multiple contracts (Ref: Single)")
-
-df_graph_yhat_region <- df_graph_yhat_1 %>%
-        filter(geography == "Region")
-df_graph_yhat_region <- droplevels(df_graph_yhat_region)
-
-ggplot(data = df_graph_yhat_1, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
         facet_grid(num~region) + 
         scale_y_continuous(breaks = c(seq(-.5, 1.5, by = .5)), limits = c(-.5, 1.5)) +
         scale_x_continuous(breaks = c(2008,2013,2019), limits = c(2006, 2021)) +
@@ -473,7 +373,6 @@ ggsave(filename = paste0(graphs,"graph_eu_silc_glm_yhat_num_presentation.pdf"), 
 
 # Graph yhat duration ----
 
-<<<<<<< HEAD
 df_graph_yhat_dur <- df_graph_yhat %>%
         filter(type == "Multiple year (Ref: Single)")
 
@@ -482,16 +381,6 @@ df_graph_yhat_region <- df_graph_yhat_dur %>%
 df_graph_yhat_region <- droplevels(df_graph_yhat_region)
 
 ggplot(data = df_graph_yhat_dur, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
-=======
-df_graph_yhat_1 <- df_graph_yhat %>%
-        filter(num == "Multiple year (Ref: Single)")
-
-df_graph_yhat_region <- df_graph_yhat_1 %>%
-        filter(geography == "Region")
-df_graph_yhat_region <- droplevels(df_graph_yhat_region)
-
-ggplot(data = df_graph_yhat_1, aes(x = panel, y = fit, group = country, size = geography, color = geography)) +
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
         facet_grid(num~region) + 
         scale_y_continuous(breaks = c(seq(-.5, 1.5, by = .5)), limits = c(-.5, 1.5)) +
         scale_x_continuous(breaks = c(2008,2013,2019), limits = c(2006, 2021)) +
@@ -530,10 +419,6 @@ ggplot(data = df_graph_yhat_1, aes(x = panel, y = fit, group = country, size = g
 
 ggsave(filename = paste0(graphs,"graph_eu_silc_glm_yhat_dur_presentation.pdf"), plot = last_plot(), height = 6, width = 8, units = "in")
 
-<<<<<<< HEAD
-=======
-
->>>>>>> c13cc683d58889aaba8f5471ecad5c7a881d390e
 # Graph mfx ever ---- 
 
 df_graph_mfx <- bind_rows(df_mfx_eu_ever, df_mfx_region_ever, df_mfx_country_ever)

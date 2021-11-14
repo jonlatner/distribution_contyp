@@ -19,12 +19,8 @@ graphs = "graphs/eu_silc/"
 results = "results/eu_silc/"
 
 # LIBRARY
-library(dplyr)
-library(ggplot2)
-library(beepr)
+library(tidyverse)
 library(forcats) #fct_reorder
-library(stringr) #str_detect
-library(broom) # tidy
 
 options(scipen=999)
 
@@ -248,7 +244,7 @@ df_yhat_country_dur <- df_yhat_country_dur %>%
         arrange(country,panel)
 
 
-# Prepare graphing data ----
+# Graph yhat ----
 
 df_yhat_ever <- rbind(df_yhat_eu_ever, df_yhat_region_ever, df_yhat_country_ever)
 df_yhat_ever$type <- 1
@@ -267,7 +263,7 @@ df_graph_yhat <- df_graph_yhat %>%
         select(-male,-age_cat,-edu_cat) %>%
         arrange(type,geography,region,country,panel)
 
-df_graph_yhat$type <- factor(df_graph_yhat$type, labels=c("Ever (Ref: Never)", "Multiple contracts (Ref: Single)", "Multiple year (Ref: Single)"))
+df_graph_yhat$type <- factor(df_graph_yhat$type, labels=c("At least 1 (Ref: 0)", "Multiple contracts (Ref: 1)", "Multiple year (Ref: 1)"))
 
 df_graph_yhat$country <- fct_relevel(df_graph_yhat$country, "Anglophone", after = Inf) # forcats
 df_graph_yhat$country <- fct_relevel(df_graph_yhat$country, "Eastern", after = Inf) # forcats
@@ -307,22 +303,24 @@ ggplot() +
         theme(panel.grid.minor = element_blank(), 
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5),
+              legend.box.margin=margin(-10,0,0,0),
               legend.title=element_blank(),
               legend.key.width = unit(2,"cm"),
-              axis.text.x = element_text(size=7),
+              axis.title.x = element_blank(),
+              # axis.text.x = element_text(size=7),
               legend.box = "vertical",
               legend.position = "bottom"
         ) +
         geom_text(data = df_graph_yhat_region, 
-                  size = 2, 
+                  size = 3, 
                   aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019), yes = fit, no = NA),
                       vjust=-2,
-                      label=sprintf(fit, fmt = '%#.3f')))
+                      label=sprintf(fit, fmt = '%#.2f')))
 
 
-ggsave(filename = paste0(graphs,"graph_eu_silc_glm_yhat_wt.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
+ggsave(filename = paste0(graphs,"graph_eu_silc_glm_yhat_wt.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")
 
-# Graph mfx ever -------------------------------------------------------------- 
+# Graph mfx ever ----
 
 df_graph_mfx <- bind_rows(df_mfx_eu_ever, df_mfx_region_ever, df_mfx_country_ever)
 
@@ -370,7 +368,7 @@ ggplot() +
                       width=.2) +
         geom_line(data = df_graph_mfx_region, aes(x = panel, y = AME, group = country), size = .5) +
         scale_x_continuous(breaks = c(2008,2013,2019), limits = c(2006, 2021)) +
-        scale_y_continuous(breaks = c(seq(-.5, .5, by = .5)), limits = c(-.5, .5)) +
+        scale_y_continuous(breaks = c(seq(-.5, .5, by = .25)), limits = c(-.5, .5)) +
         scale_color_manual(values = c("black", "gray80")) +
         geom_hline(yintercept=0) +
         ylab("Average marginal effect") +
@@ -380,21 +378,22 @@ ggplot() +
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5),
               legend.title=element_blank(),
+              axis.title.x = element_blank(),
               legend.key.width = unit(2,"cm"),
-              axis.text.x = element_text(size=7),
+              legend.box.margin=margin(-10,0,0,0),
+              # axis.text.x = element_text(size=7),
               legend.box = "vertical",
               legend.position = "bottom"
         ) +
         geom_text(data = df_graph_mfx_region, 
-                  size = 2, 
+                  size = 3, 
                   aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019), yes = AME, no = NA),
-                      vjust=-3,
-                      label=sprintf(AME, fmt = '%#.3f')))
+                      vjust=-2,
+                      label=sprintf(AME, fmt = '%#.2f')))
 
-# ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_ever_wt.jpg"), plot = last_plot(), height = 8, width = 6, units = "in")
-ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_ever_wt.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
+ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_ever_wt.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")
 
-# Graph mfx contract num -------------------------------------------------------------- 
+# Graph mfx contract num ----
 
 df_graph_mfx <- bind_rows(df_mfx_eu_num, df_mfx_region_num, df_mfx_country_num)
 
@@ -452,21 +451,22 @@ ggplot() +
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5),
               legend.title=element_blank(),
+              legend.box.margin=margin(-10,0,0,0),
               legend.key.width = unit(2,"cm"),
-              axis.text.x = element_text(size=7),
+              axis.title.x = element_blank(),
+              # axis.text.x = element_text(size=7),
               legend.box = "vertical",
               legend.position = "bottom"
         ) +
         geom_text(data = df_graph_mfx_region, 
-                  size = 2, 
+                  size = 3, 
                   aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019), yes = AME, no = NA),
-                      vjust=-3,
-                      label=sprintf(AME, fmt = '%#.3f')))
+                      vjust=-2,
+                      label=sprintf(AME, fmt = '%#.2f')))
 
-# ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_num_wt.jpg"), plot = last_plot(), height = 8, width = 6, units = "in")
-ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_num_wt.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
+ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_num_wt.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")
 
-# Graph mfx contract dur -------------------------------------------------------------- 
+# Graph mfx contract dur ----
 
 df_graph_mfx <- bind_rows(df_mfx_eu_dur, df_mfx_region_dur, df_mfx_country_dur)
 summary(df_graph_mfx)
@@ -524,17 +524,18 @@ ggplot() +
         theme(panel.grid.minor = element_blank(), 
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5),
+              legend.box.margin=margin(-10,0,0,0),
               legend.title=element_blank(),
               legend.key.width = unit(2,"cm"),
-              axis.text.x = element_text(size=7),
+              axis.title.x = element_blank(),
+              # axis.text.x = element_text(size=7),
               legend.box = "vertical",
               legend.position = "bottom"
         ) +
         geom_text(data = df_graph_mfx_region, 
-                  size = 2, 
+                  size = 3, 
                   aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019), yes = AME, no = NA),
-                      vjust=-3,
-                      label=sprintf(AME, fmt = '%#.3f')))
+                      vjust=-2,
+                      label=sprintf(AME, fmt = '%#.2f')))
 
-# ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_dur_wt.jpg"), plot = last_plot(), height = 8, width = 6, units = "in")
-ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_dur_wt.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
+ggsave(filename = paste0(graphs,"graph_eu_silc_glm_mfx_dur_wt.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")

@@ -11,21 +11,23 @@ detachAllPackages <- function() {
 detachAllPackages()
 rm(list=ls(all=TRUE))
 
-# FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+# FOLDERS
+setwd("/Users/jonathanlatner/Google Drive/")
+# setwd("C:/Users/ba1ks6/Google Drive/")
 
-data_files = "data_files/eu_lfs/"
-graphs = "graphs/eu_lfs/"
+data_files = "SECCOPA/projects/distribution_contyp/data_files/eu_lfs/"
+graphs = "SECCOPA/projects/distribution_contyp/graphs/"
 
 # LIBRARY
-library(tidyverse)
-library(Hmisc) #wtd.mean
-library(car) # recode
-library(forcats) # fct_relevel
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(car)
+library(forcats)
+library(beepr)
+library(data.table)
 
 ## The function to get overlapping strip labels
-'%!in%' <- function(x,y)!('%in%'(x,y))
-
 OverlappingStripLabels = function(plot) {
         
         # Get the ggplot grob
@@ -151,56 +153,167 @@ names(df_eu_lfs_0) <- tolower(names(df_eu_lfs_0))
 str(df_eu_lfs_0)
 
 df_eu_lfs_1 <- df_eu_lfs_0 %>%
-        filter(year >= 1996) %>%
-        filter(ilostat==1 | ilostat == 2) %>%
+        select(-marstat,-ftpt,-countryb,-temp) %>%
+        filter(year >= 2005) %>%
+        # filter(ilostat==1 | ilostat == 2) %>% # employed or unemployed
         filter(age >=25 & age <=54) %>%
-        filter(temp != 9) %>%
-        mutate(temp = temp - 1) %>%
         mutate(female = sex - 1) %>%
         rename(edu_cat = hatlev1d,
                weight = coeff) %>%
         filter(weight>0) %>%
         filter(edu_cat=="L" | edu_cat=="M" | edu_cat=="H")
 df_eu_lfs_1 <- droplevels(df_eu_lfs_1)
-summary(df_eu_lfs_1)
-nrow(df_eu_lfs_1)*10
 
-t <- unique(df_eu_lfs_1$country)
-
-with(df_eu_lfs_1,table(year,edu_cat, useNA = "ifany"))
-
-df_eu_lfs_1 <- merge(df_eu_lfs_1,region, by = c("country"), all.x = TRUE)
+df_eu_lfs_1 <- merge(data.table(df_eu_lfs_1),data.table(region), by = c("country"), all.x = TRUE)
 
 df_eu_lfs_1$age_cat <- recode(df_eu_lfs_1$age, "25:34 = 1; 35:44=2; 45:54=3")
 df_eu_lfs_1$age_cat <- factor(df_eu_lfs_1$age_cat, labels=c("< 35", "35-44", "> 45"))
 df_eu_lfs_1$female <- factor(df_eu_lfs_1$female, labels=c("Male", "Female"))
-df_eu_lfs_1$edu_cat <- factor(df_eu_lfs_1$edu_cat, 
-                              levels = c("L","M","H"), 
+df_eu_lfs_1$edu_cat <- factor(df_eu_lfs_1$edu_cat,
+                              levels = c("L","M","H"),
                               labels=c("< Secondary", "Secondary", "> Secondary"))
 
-# Graph percent FTC -----------------------------------------
+summary(df_eu_lfs_1)
+
+# Gender -----------------------------------------
 
 df_graph_countries <- df_eu_lfs_1 %>%
-        group_by(region, country_name, year) %>%
-        summarise(avg = wtd.mean(temp,weight)) %>%
+        group_by(region, country_name, year,female) %>%
+        tally() %>%
         ungroup() %>%
+        group_by(region,country_name,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        filter(female=="Female") %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
         mutate(level = "Countries")
 
 df_graph_regions <- df_eu_lfs_1 %>%
-        group_by(region, year) %>%
-        summarise(avg = wtd.mean(temp,weight)) %>%
+        group_by(region, year,female) %>%
+        tally(wt = weight) %>%
         ungroup() %>%
+        group_by(region,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        filter(female=="Female") %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
         mutate(level = "Region", 
                country_name = region)
 
 df_graph_eu <- df_eu_lfs_1 %>%
-        group_by(year) %>%
-        summarise(avg = wtd.mean(temp,weight)) %>%
+        group_by(year,female) %>%
+        tally(wt = weight) %>%
         ungroup() %>%
+        group_by(year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        filter(female=="Female") %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(country_name = "Europe", 
+               region = "Europe", 
+               level = "Region")
+
+df_graph <- rbind(df_graph_countries,df_graph_regions,df_graph_eu)
+
+rm(df_graph_countries,df_graph_regions,df_graph_eu)
+
+df_graph_gender <- df_graph %>%
+        rename(variable=female) %>%
+        mutate(factor = "Gender")
+
+# Age -----------------------------------------
+
+df_graph_countries <- df_eu_lfs_1 %>%
+        group_by(region, country_name, year, age_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(region,country_name,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(level = "Countries")
+
+df_graph_regions <- df_eu_lfs_1 %>%
+        group_by(region, year, age_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(region,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup()%>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(level = "Region", 
+               country_name = region) %>%
+        arrange(region,age_cat,year)
+
+df_graph_eu <- df_eu_lfs_1 %>%
+        group_by(year,age_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
         mutate(country_name = "Europe", region = "Europe", level = "Region")
 
 df_graph <- rbind(df_graph_countries,df_graph_regions,df_graph_eu)
 rm(df_graph_countries,df_graph_regions,df_graph_eu)
+
+df_graph_age <- df_graph %>%
+        rename(variable=age_cat) %>%
+        mutate(factor = "Age")
+
+# Edu -----------------------------------------
+
+df_graph_countries <- df_eu_lfs_1 %>%
+        group_by(region, country_name, year, edu_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(region,country_name,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(level = "Countries")
+
+df_graph_regions <- df_eu_lfs_1 %>%
+        group_by(region, year, edu_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(region,year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(level = "Region", 
+               country_name = region)
+
+df_graph_eu <- df_eu_lfs_1 %>%
+        group_by(year,edu_cat) %>%
+        tally(wt = weight) %>%
+        ungroup() %>%
+        group_by(year) %>%
+        mutate(pop = sum(n)) %>%
+        ungroup() %>%
+        mutate(pct = n/pop) %>%
+        select(-n,-pop) %>%
+        mutate(country_name = "Europe", region = "Europe", level = "Region")
+
+df_graph <- rbind(df_graph_countries,df_graph_regions,df_graph_eu)
+rm(df_graph_countries,df_graph_regions,df_graph_eu)
+
+df_graph_edu <- df_graph %>%
+        rename(variable=edu_cat) %>%
+        mutate(factor = "Education")
+
+# Combine graphs -----------------------------------------
+
+df_graph <- rbind(df_graph_gender,df_graph_age,df_graph_edu)
 
 df_graph$level <- factor(df_graph$level,
                          levels = c("Region", "Countries"))
@@ -210,96 +323,48 @@ df_graph$country_name <- fct_relevel(df_graph$country_name, "Nordic", after = In
 df_graph$country_name <- fct_relevel(df_graph$country_name, "Eastern", after = Inf) # forcats
 df_graph$country_name <- fct_relevel(df_graph$country_name, "Continental", after = Inf) # forcats
 df_graph$country_name <- fct_relevel(df_graph$country_name, "Anglophone", after = Inf) # forcats
+df_graph$country_name <- fct_relevel(df_graph$country_name, "Europe", after = Inf) # forcats
 df_graph$region <- fct_relevel(df_graph$region, "Europe", after = 0) # forcats
-
-df_graph_1 <- df_graph %>%
-        filter(year <= 2007) %>%
-        mutate(period = 1,
-               year = year - 1995)
-
-df_graph_2 <- df_graph %>%
-        filter(year >= 2007) %>%
-        mutate(period = 2,
-               year = year - 2006)
-
-df_graph <- rbind(df_graph_1,df_graph_2)
-rm(df_graph_1,df_graph_2)
-
-df_graph$period <- factor(df_graph$period,
-                          labels = c("1996 - 2007", "2007 - 2018"))
+df_graph$label_region <- "Region"
 
 df_graph_region <- df_graph %>%
-        filter(level != "Countries") %>%
-        mutate(levels=level)
+        filter(level != "Countries")
 
-df_graph <- df_graph %>%
-        mutate(levels = ifelse(country_name == "Italy", yes = "Italy",
-                               ifelse(country_name == "Poland", yes = "Poland",
-                                      ifelse(country_name == "Netherlands", yes = "Netherlands",
-                                             ifelse(country_name == "France", yes = "France", 
-                                                    ifelse(country_name == "Portugal", yes = "Portugal", 
-                                                           ifelse(country_name == "Spain", yes = "Spain", 
-                                                                  ifelse(level == "Countries", yes = "Countries",
-                                                                         ifelse(level == "Region", yes = "Region",
-                                                                                no = NA)))))))))
+library(grid)
+library(gtable)
+library(plyr)
 
-df_graph$levels <- fct_relevel(df_graph$levels, "Countries", after = 0) # forcats
-df_graph$levels <- fct_relevel(df_graph$levels, "Region", after = 0) # forcats
-
-table(df_graph$levels)
-
-ggplot(df_graph, aes(x = year, y = avg, group = country_name, color = levels, size = levels)) +
-        facet_grid(period ~ region) +
-        scale_size_manual(values = c(1,.25,.5,.5,.5,.5,.5,.5)) +
-        scale_color_manual(values = c("black", "gray", "blue", "darkgreen", "orange", "red", "purple", "gold")) +
+p <- ggplot(df_graph, aes(x = year, y = pct, group = country_name, color = level, size = level)) +
+        facet_grid(factor + variable ~ label_region + region,scales = "free_y") +
+        scale_size_manual(values = c(1,.5)) +
+        scale_color_manual(values = c("black", "gray")) +
         geom_line() +
-        scale_x_continuous(breaks = c(1,6,12), limits = c(-.5,13.5)) +
+        scale_y_continuous(breaks = seq(0, 1, .2), limits = c(0, 1)) +
+        scale_x_continuous(breaks = c(2005, 2011, 2018), limits = c(2003, 2020)) +
+        ylab("Percent (%) of total population (25-54)") +
+        xlab("Period") + 
         theme_bw() +
         theme(panel.grid.minor = element_blank(), 
               legend.title=element_blank(),
-              axis.title=element_blank(),
               legend.key.width = unit(2,"cm"),
               legend.position = "bottom",
-              axis.text.x = element_blank(),
+              axis.title.y = element_text(size = 9),
+              axis.title.x = element_blank(), 
+              axis.text.x = element_text(size=7),
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5)
         ) +
         geom_text(data = df_graph_region,
                   show.legend = FALSE,
                   size = 2, 
-                  aes(x = year, y = ifelse(year %in% c(1,6,12), yes = avg, no = NA),
-                      vjust=-2,
-                      label=sprintf(avg, fmt = '%#.3f')))
+                  aes(x = year, y = ifelse(year %in% c(2005, 2018), yes = pct, no = NA),
+                      vjust=-1,
+                      label=sprintf(pct, fmt = '%#.3f')))
 
-## Save the plot
-ggsave(filename = paste0(graphs,"graph_rate_region_presentation.pdf"), height = 3, width = 6, units = "in")
+## Draw the plot
+grid.newpage()
+grid.draw(OverlappingStripLabels(p))
 
-df_graph_period_change <- df_graph_region %>%
-        select(-country_name) %>%
-        group_by(period,region) %>%
-        summarise(pct_change = last(avg)/first(avg)-1) %>%
-        ungroup() %>%
-        mutate(label = "Percentage change")
-
-df_graph_period_change$period <- factor(df_graph_period_change$period,
-                                        labels = c("1996 -\n2007", "2007 -\n2018"))
-
-ggplot(data=df_graph_period_change, aes(x=period, y=pct_change)) +
-        facet_grid(label ~ region) +
-        scale_y_continuous(breaks = seq(-.5,2.5,.5), limits = c(-.5,2.5)) +
-        geom_bar(stat="identity") +
-        geom_text(aes(label=sprintf(pct_change, fmt = '%#.3f')), 
-                  vjust=ifelse(df_graph_period_change$pct_change>0, yes = -1, no = 1.1), 
-                  size=2)+
-        theme_bw() +
-        theme(panel.grid.minor = element_blank(), 
-              legend.title=element_blank(),
-              axis.text.x = element_text(size = 7),
-              axis.title=element_blank(),
-              legend.key.width = unit(2,"cm"),
-              legend.position = "bottom",
-              axis.line.y = element_line(color="black", size=.5),
-              axis.line.x = element_line(color="black", size=.5)
-        )
-
-ggsave(filename = paste0(graphs,"graph_pct_change_region_presentation.pdf"), height = 2, width = 6, units = "in")
+cairo_pdf(paste0(graphs,"graph_lmp_group.pdf"), height = 8, width = 6)
+grid.draw(OverlappingStripLabels(p))
+dev.off()

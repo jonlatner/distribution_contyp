@@ -153,7 +153,6 @@ df_eu_silc_2_year_temp_country <- df_eu_silc_2_year %>%
   group_by(country, year) %>%
   summarise(avg=wtd.mean(temp,weight_long)) %>%
   ungroup() %>%
-  filter(year<2019) %>%
   rename(geography=country) %>%
   mutate(source="SILC (2 year)") 
 
@@ -161,7 +160,6 @@ df_eu_silc_2_year_temp_region <- df_eu_silc_2_year %>%
   group_by(region, year) %>%
   summarise(avg=wtd.mean(temp,weight_long)) %>%
   ungroup() %>%
-  filter(year<2019) %>%
   rename(geography=region) %>%
   mutate(source="SILC (2 year)") 
 
@@ -169,7 +167,6 @@ df_eu_silc_2_year_temp_EU <- df_eu_silc_2_year %>%
   group_by(year) %>%
   summarise(avg=wtd.mean(temp,weight_long)) %>%
   ungroup() %>%
-  filter(year<2019) %>%
   mutate(geography="EU") %>%
   mutate(source="SILC (2 year)") 
 
@@ -180,7 +177,7 @@ rm(df_eu_silc_2_year_temp_EU,df_eu_silc_2_year_temp_region,df_eu_silc_2_year_tem
 
 df_graph <- rbind(df_eu_lfs_temp,df_eu_silc_4_year_temp,df_eu_silc_2_year_temp,df_eu_silc_xs_temp)
 df_graph <- df_graph %>%
-  filter(year>2004&year<2019,
+  filter(year>2004,
          avg>0, # affects Denmark
          ) %>%
   filter(geography!="Germany",
@@ -202,7 +199,7 @@ df_graph$geography <- fct_relevel(df_graph$geography, "EU", after = 0) # forcats
 
 ggplot(df_graph, aes(x = year, y = avg, color=source, linetype=source)) +
   facet_wrap( ~ geography) +
-  scale_x_continuous(breaks = c(2005,2011,2018), limits = c(2004, 2019)) +
+  scale_x_continuous(breaks = c(2005,2012,2019), limits = c(2004, 2020)) +
   scale_color_manual(values=c("black","gray50","black","gray50")) +
   scale_linetype_manual(values=c("dashed","solid","solid","dashed")) +
   ylab("Temporary employment rate") +
@@ -217,5 +214,6 @@ ggplot(df_graph, aes(x = year, y = avg, color=source, linetype=source)) +
         axis.line.x = element_line(color="black", size=.5)
   )
 
-ggsave(filename = paste0(graphs,"graph_eu_silc_compare_SILC_LFS.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
-beep()
+ggsave(filename = paste0(graphs,"graph_eu_silc_compare_SILC_LFS.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")
+
+

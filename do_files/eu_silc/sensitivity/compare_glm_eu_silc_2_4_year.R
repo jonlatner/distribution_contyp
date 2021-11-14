@@ -13,8 +13,9 @@ rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
 setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
-setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
+data_files = "data_files/eu_silc/"
 results_4_year = "results/eu_silc/"
 results_2_year = "results/eu_silc/2_year_panel/"
 graphs = "graphs/eu_silc/sensitivity/"
@@ -24,8 +25,64 @@ library(tidyverse)
 library(ggplot2)
 library(forcats) #fct_reorder
 library(beepr)
+library(Hmisc)
 
 options(scipen=999)
+
+# Load/clean (4 year - unadjusted) --------------------------------------------------------------
+
+df_eu_silc_clean_xc <- readRDS(file = paste0(data_files, "df_eu_silc_clean_xc.rds"))
+df_eu_silc_clean_panel <- readRDS(file = paste0(data_files, "df_eu_silc_clean_panel.rds"))
+
+df_eu_ever_unadjusted <- df_eu_silc_clean_xc %>%
+        group_by(panel) %>%
+        summarise(fit = mean(ftc_ever)) %>%
+        ungroup() %>%
+        mutate(geography = "EU-SILC", 
+               source="4 year (unadjusted)")
+
+df_region_ever_unadjusted <- df_eu_silc_clean_xc %>%
+        group_by(panel,region) %>%
+        summarise(fit = mean(ftc_ever)) %>%
+        ungroup() %>%
+        mutate(geography = region, 
+               source="4 year (unadjusted)")
+
+df_eu_num_unadjusted <- df_eu_silc_clean_xc %>%
+        filter(ftc_num > 0) %>%
+        mutate(ftc_num=ftc_num-1) %>%
+        group_by(panel) %>%
+        summarise(fit = mean(ftc_num)) %>%
+        ungroup() %>%
+        mutate(geography = "EU-SILC", 
+               source="4 year (unadjusted)")
+
+df_region_num_unadjusted <- df_eu_silc_clean_xc %>%
+        filter(ftc_num > 0) %>%
+        mutate(ftc_num=ftc_num-1) %>%
+        group_by(panel,region) %>%
+        summarise(fit = mean(ftc_num)) %>%
+        ungroup() %>%
+        mutate(geography = region, 
+               source="4 year (unadjusted)")
+
+df_eu_dur_unadjusted <- df_eu_silc_clean_panel %>%
+        filter(ftc_dur > 0) %>%
+        mutate(ftc_dur=ftc_dur-1) %>%
+        group_by(panel) %>%
+        summarise(fit = mean(ftc_dur)) %>%
+        ungroup() %>%
+        mutate(geography = "EU-SILC", 
+               source="4 year (unadjusted)")
+
+df_region_dur_unadjusted <- df_eu_silc_clean_panel %>%
+        filter(ftc_dur > 0) %>%
+        mutate(ftc_dur=ftc_dur-1) %>%
+        group_by(panel,region) %>%
+        summarise(fit = mean(ftc_dur)) %>%
+        ungroup() %>%
+        mutate(geography = region, 
+               source="4 year (unadjusted)")
 
 # Load (4 year) --------------------------------------------------------------
 df_yhat_eu_ever_4_year <- readRDS(file = paste0(results_4_year,"df_yhat_glm_ever_eu_wt.rds")) %>%
@@ -76,7 +133,9 @@ df_yhat_eu_ever <- rbind(df_yhat_eu_ever_2_year,df_yhat_eu_ever_4_year)
 df_yhat_region_ever <- rbind(df_yhat_region_ever_2_year,df_yhat_region_ever_4_year)
 df_yhat_country_ever <- rbind(df_yhat_country_ever_2_year,df_yhat_country_ever_4_year)
 
-rm(df_yhat_eu_ever_2_year,df_yhat_eu_ever_4_year,df_yhat_region_ever_2_year,df_yhat_region_ever_4_year,df_yhat_country_ever_2_year,df_yhat_country_ever_4_year)
+df_yhat_eu_ever <- bind_rows(df_yhat_eu_ever,df_eu_ever_unadjusted)
+df_yhat_region_ever <- bind_rows(df_yhat_region_ever,df_region_ever_unadjusted)
+rm(df_yhat_eu_ever_2_year,df_yhat_eu_ever_4_year,df_yhat_region_ever_2_year,df_yhat_region_ever_4_year,df_yhat_country_ever_2_year,df_yhat_country_ever_4_year,df_eu_ever_unadjusted,df_region_ever_unadjusted)
 
 df_yhat_eu_ever <- df_yhat_eu_ever %>%
         select(geography,fit,lwr,upr,panel,source) 
@@ -92,7 +151,9 @@ df_yhat_eu_num <- rbind(df_yhat_eu_num_2_year,df_yhat_eu_num_4_year)
 df_yhat_region_num <- rbind(df_yhat_region_num_2_year,df_yhat_region_num_4_year)
 df_yhat_country_num <- rbind(df_yhat_country_num_2_year,df_yhat_country_num_4_year)
 
-rm(df_yhat_eu_num_2_year,df_yhat_eu_num_4_year,df_yhat_region_num_2_year,df_yhat_region_num_4_year,df_yhat_country_num_2_year,df_yhat_country_num_4_year)
+df_yhat_eu_num <- bind_rows(df_yhat_eu_num,df_eu_num_unadjusted)
+df_yhat_region_num <- bind_rows(df_yhat_region_num,df_region_num_unadjusted)
+rm(df_yhat_eu_num_2_year,df_yhat_eu_num_4_year,df_yhat_region_num_2_year,df_yhat_region_num_4_year,df_yhat_country_num_2_year,df_yhat_country_num_4_year,df_eu_num_unadjusted,df_region_num_unadjusted)
 
 df_yhat_eu_num <- df_yhat_eu_num %>%
         select(geography,fit,lwr,upr,panel,source) 
@@ -108,7 +169,9 @@ df_yhat_eu_dur <- rbind(df_yhat_eu_dur_2_year,df_yhat_eu_dur_4_year)
 df_yhat_region_dur <- rbind(df_yhat_region_dur_2_year,df_yhat_region_dur_4_year)
 df_yhat_country_dur <- rbind(df_yhat_country_dur_2_year,df_yhat_country_dur_4_year)
 
-rm(df_yhat_eu_dur_2_year,df_yhat_eu_dur_4_year,df_yhat_region_dur_2_year,df_yhat_region_dur_4_year,df_yhat_country_dur_2_year,df_yhat_country_dur_4_year)
+df_yhat_eu_dur <- bind_rows(df_yhat_eu_dur,df_eu_dur_unadjusted)
+df_yhat_region_dur <- bind_rows(df_yhat_region_dur,df_region_dur_unadjusted)
+rm(df_yhat_eu_dur_2_year,df_yhat_eu_dur_4_year,df_yhat_region_dur_2_year,df_yhat_region_dur_4_year,df_yhat_country_dur_2_year,df_yhat_country_dur_4_year,df_eu_dur_unadjusted,df_region_dur_unadjusted)
 
 df_yhat_eu_dur <- df_yhat_eu_dur %>%
         select(geography,fit,lwr,upr,panel,source) 
@@ -131,7 +194,7 @@ df_yhat_dur$type <- 3
 df_graph_yhat <- rbind(df_yhat_ever,df_yhat_num,df_yhat_dur)
 rm(df_yhat_ever,df_yhat_num,df_yhat_dur)
 
-df_graph_yhat$type <- factor(df_graph_yhat$type, labels=c("Ever (Ref: Never)", "Multiple contracts (Ref: Single)", "Multiple year (Ref: Single)"))
+df_graph_yhat$type <- factor(df_graph_yhat$type, labels=c("At least 1 (Ref: 0)", "Multiple contracts (Ref: 1)", "Multiple year (Ref: 1)"))
 
 df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "Anglophone", after = Inf) # forcats
 df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "Eastern", after = Inf) # forcats
@@ -140,11 +203,12 @@ df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "Nordic", after 
 df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "Southern", after = Inf) # forcats
 df_graph_yhat$geography <- fct_relevel(df_graph_yhat$geography, "EU-SILC", after = 0) # forcats
 
-ggplot(data = df_graph_yhat, aes(x = panel, y = fit, color = source)) +
+ggplot(data = df_graph_yhat, aes(x = panel, y = fit, linetype = source, color = source, group = source)) +
         facet_grid(type~geography, scales = "free_y") + 
         geom_line() +
         scale_x_continuous(breaks = c(2008,2013,2019), limits = c(2006, 2021)) +
-        scale_color_manual(values = c("gray50","black")) +
+        scale_linetype_manual(values = c("solid","solid","dashed")) +
+        scale_color_manual(values = c("gray50","black","black")) +
         geom_errorbar(aes(ymin = lwr,
                           ymax = upr
         ),
@@ -153,23 +217,13 @@ ggplot(data = df_graph_yhat, aes(x = panel, y = fit, color = source)) +
         xlab("Panel wave ending") + 
         theme_bw() +
         theme(panel.grid.minor = element_blank(), 
+              legend.box.margin=margin(-10,0,0,0),
               axis.line.y = element_line(color="black", size=.5),
               axis.line.x = element_line(color="black", size=.5),
               legend.title=element_blank(),
-              axis.text.x = element_text(size=7),
               legend.key.width = unit(2,"cm"),
               legend.box = "vertical",
               legend.position = "bottom"
-        ) +
-        geom_text(data = df_graph_yhat, 
-                  size = 2, 
-                  aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019) & source=="4 year", yes = fit, no = NA),
-                      vjust=-3,
-                      label=sprintf(fit, fmt = '%#.3f'))) +
-        geom_text(data = df_graph_yhat, 
-                  size = 2, 
-                  aes(x = panel, y = ifelse(panel %in% c(2008,2013,2019) & source=="2 year", yes = fit, no = NA),
-                      vjust=+3,
-                      label=sprintf(fit, fmt = '%#.3f')))
-        
-ggsave(filename = paste0(graphs,"graph_eu_silc_compare_2_4_year_panel.pdf"), plot = last_plot(), height = 8, width = 6, units = "in")
+        ) 
+
+ggsave(filename = paste0(graphs,"graph_eu_silc_compare_2_4_year_panel.pdf"), plot = last_plot(), height = 6, width = 9, units = "in")

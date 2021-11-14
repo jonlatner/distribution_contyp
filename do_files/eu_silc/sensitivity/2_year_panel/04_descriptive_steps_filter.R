@@ -117,7 +117,7 @@ t
 
 print(t, 
       sanitize.colnames.function = identity, 
-      file = paste0(tables,"descriptives_tables_steps.tex"),
+      file = paste0(tables,"descriptives_tables_steps_silc_2.tex"),
       include.rownames = FALSE, 
       include.colnames = FALSE,
       sanitize.text.function = identity,
