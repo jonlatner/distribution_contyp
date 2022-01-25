@@ -12,8 +12,7 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/Google Drive/SECCOPA/projects/distribution_contyp/")
-# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+setwd("~/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_lfs/"
 graphs = "graphs/eu_lfs/sensitivity/"

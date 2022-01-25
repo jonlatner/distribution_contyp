@@ -13,7 +13,7 @@ rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
 setwd("/Users/jonathanlatner/OneDrive/SECCOPA/projects/distribution_contyp/")
-# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
+# setwd("~/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/2_year_panel/"
 tables = "tables/eu_silc/2_year_panel/"

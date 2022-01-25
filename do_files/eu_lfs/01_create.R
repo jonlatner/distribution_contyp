@@ -11,10 +11,10 @@ detachAllPackages <- function() {
 detachAllPackages()
 rm(list=ls(all=TRUE))
 
-# FOLDERS
+# FOLDERS - ADAPT THIS PATHWAY
 setwd("/Users/jonathanlatner/OneDrive/SECCOPA/")
+# setwd("/Users/jonathanlatner/Documents/GitHub/distribution_contyp/")
 
-# orig_data_files = "/Volumes/seccopa.empsoz/Data/EU-LFS/"
 orig_data_files = "data/EU_LFS_2019/YearlyFiles_83_2019/"
 project_data_files = "projects/distribution_contyp/data_files/eu_lfs/"
 

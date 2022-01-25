@@ -12,8 +12,7 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS
-setwd("/Users/jonathanlatner/Google Drive/SECCOPA/")
-# setwd("C:/Users/ba1ks6/Google Drive/")
+setwd("~/GitHub/distribution_contyp/")
 
 orig_data_files = "data/EU_SILC_2019/Cross_2004_19/data_files/"
 project_data_files = "projects/distribution_contyp/data_files/eu_silc/cross_sectional/"

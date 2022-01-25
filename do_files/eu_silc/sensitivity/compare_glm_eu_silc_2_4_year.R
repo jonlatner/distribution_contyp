@@ -12,8 +12,7 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/OneDrive/SECCOPA/projects/distribution_contyp/")
-# setwd("~/GitHub/distribution_contyp/")
+setwd("~/GitHub/distribution_contyp/")
 
 data_files = "data_files/eu_silc/"
 results_4_year = "results/eu_silc/"
