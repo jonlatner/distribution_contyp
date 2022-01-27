@@ -1,2 +1,5 @@
 # distribution_contyp
 
+Temporary employment rate and risk: A life course approach to examining trends in European countries
+
+There is a perception that temporary employment is rising in Europe, but there is little evidence to support this.  This represents a puzzle.  One possibility is that temporary employment is not rising because large social forces counteract the reasons that predict a higher incidence of temporary work.  Another possibility is that evidence is based on cross-sectional data, which underestimates changes in the level and trend in temporary employment.  Using data on 31 European countries and a sample of prime-age workers, we compare and contrast changes in the temporary employment rate in a single period of time using cross-sectional data, with changes in the risk of experiencing temporary employment in multiple periods of time using longitudinal data.  Our results suggest that the temporary employment rate has stagnated over time, but the risk of experiencing it continues to rise.  Our contribution provides insight into the nature of employment experiences associated with insecurity.  
