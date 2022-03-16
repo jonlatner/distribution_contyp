@@ -14,8 +14,8 @@ rm(list=ls(all=TRUE))
 # FOLDERS
 setwd("~/GitHub/distribution_contyp/")
 
-orig_data_files = "data/EU_SILC_2019/Cross_2004_19/data_files/"
-project_data_files = "projects/distribution_contyp/data_files/eu_silc/cross_sectional/"
+orig_data_files = "orig_data_files/EU_SILC_2019/Cross_2004_19/data_files/"
+project_data_files = "data_files/eu_silc/cross_sectional/"
 
 # LIBRARY
 library(tidyverse)

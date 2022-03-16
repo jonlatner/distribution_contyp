@@ -1,4 +1,4 @@
-# Top commands --------------------------------------------------------------
+# Top commands ----
 
 # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 detachAllPackages <- function() {
@@ -27,11 +27,11 @@ library(survey)
 
 options(scipen=999)
 
-# Load data --------------------------------------------------------------
+# Load data ----
 
 df_eu_silc <- readRDS(file = paste0(data_files,"03_df_eu_silc_clean_xc.rds"))
 
-# LPM --------------------------------------------------------------
+# LPM ----
 
 # Country
 country <- unique(df_eu_silc$country_name)
@@ -206,7 +206,7 @@ for(r in region) {
 rm(my_svy,beta,table,yhat,mfx,df_panel,df_new_data_yhat,p,panel,df_region,r,region)
 
 
-# Save --------------------------------------------------------------
+# Save ----
 
 saveRDS(df_yhat_eu, file = paste0(results, "df_yhat_glm_ever_eu_wt.rds"))
 saveRDS(df_yhat_region, file = paste0(results, "df_yhat_glm_ever_region_wt.rds"))

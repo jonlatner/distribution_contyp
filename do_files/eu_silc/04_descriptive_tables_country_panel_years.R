@@ -1,4 +1,4 @@
-# Top commands--------------------------------------------------------------
+# Top commands----
 
 # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 detachAllPackages <- function() {
@@ -23,11 +23,11 @@ library(xtable)
 
 options(scipen=999)
 
-# Load data--------------------------------------------------------------
+# Load data----
 
 df_eu_silc <- readRDS(file = paste0(data_files,"03_df_eu_silc_clean.rds"))
 
-# Geography data--------------------------------------------------------------
+# Geography data----
 
 country_name <- c("Switzerland", "Luxembourg", "Belgium", "Austria", "Netherlands", "France", 
                   "United Kingdom", "Ireland", 
@@ -44,7 +44,7 @@ geography <- cbind(country_name, region)
 
 rm(country_name, region)
 
-# Country --------------------------------------------------------------
+# Country ----
 
 df_country_panel <- data.frame(with(df_eu_silc, table(country_name,panel)))
 df_country_panel <- filter(df_country_panel, Freq>0) %>% arrange(panel,country_name)
@@ -95,7 +95,7 @@ df_country_panel_clean <- merge(df_country_panel_clean,df_country_panel_3)
 
 rm(df_country_panel_1,df_country_panel_2,df_country_panel_3,df_country_panel_4,df_country_panel)
 
-# Region --------------------------------------------------------------
+# Region ----
 df_region_panel <- merge(df_eu_silc,geography)
 df_region_panel <- data.frame(with(df_region_panel, table(region,panel)))
 df_region_panel <- filter(df_region_panel, Freq>0) %>% arrange(panel,region)
@@ -150,7 +150,7 @@ df_region_panel_clean <- df_region_panel_clean %>%
   rename(country_name=region) %>%
   filter(country_name!="Total")
 
-# Create table --------------------------------------------------------------
+# Create table ----
 
 df_table <- rbind(df_country_panel_clean,df_region_panel_clean)
 
@@ -169,7 +169,7 @@ df_table$country_name <- factor(df_table$country_name,
 
 df_table <- arrange(df_table, country_name)
 
-# Create table --------------------------------------------------------------
+# Create table ----
 
 df_table$country_name <- NULL
         

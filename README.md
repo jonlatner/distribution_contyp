@@ -1,5 +1,10 @@
 # distribution_contyp
 
-Temporary employment rate and risk: A life course approach to examining trends in European countries
+[![DOI:10.7910/DVN/U0RTXA](http://img.shields.io/badge/DOI-10.7910/DVN/ZBLXPR.425840-B31B1B.svg)](https://doi.org/10.7910/DVN/ZBLXPR)
 
-There is a perception that temporary employment is rising in Europe, but there is little evidence to support this.  This represents a puzzle.  One possibility is that temporary employment is not rising because large social forces counteract the reasons that predict a higher incidence of temporary work.  Another possibility is that evidence is based on cross-sectional data, which underestimates changes in the level and trend in temporary employment.  Using data on 31 European countries and a sample of prime-age workers, we compare and contrast changes in the temporary employment rate in a single period of time using cross-sectional data, with changes in the risk of experiencing temporary employment in multiple periods of time using longitudinal data.  Our results suggest that the temporary employment rate has stagnated over time, but the risk of experiencing it continues to rise.  Our contribution provides insight into the nature of employment experiences associated with insecurity.  
+Repository for the codes used for the analyses of Jonathan Latner (2022), "Temporary employment in Europe: Stagnating rates and rising risks."  This article has been accepted for publication by the journal, European Societies.
+
+All analyses in the article were conducted using R. 
+
+Complete R codes used are in separate .do -files.  The distinct files clean the data, analyze it, and reproduce various tables and graphs.  The data are not publicly available.  
+

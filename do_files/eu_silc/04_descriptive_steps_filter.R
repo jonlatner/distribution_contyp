@@ -1,4 +1,4 @@
-# Top commands--------------------------------------------------------------
+# Top commands----
 
 # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 detachAllPackages <- function() {
@@ -24,7 +24,7 @@ library(xtable)
 options(scipen=999)
 
 
-# Load data--------------------------------------------------------------
+# Load data----
 
 df_filter <- readRDS(file = paste0(data_files,"02_df_eu_silc_filter_steps.rds"))
 
@@ -50,7 +50,7 @@ df_filter <- df_filter %>%
 
 df_filter
 
-# Clean data--------------------------------------------------------------
+# Clean data----
 
 df_filter <- df_filter %>%
   mutate(obs_diff = paste0(round((total/lag(total,1)-1)*100,0),"\\%"),

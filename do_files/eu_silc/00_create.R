@@ -12,10 +12,10 @@ detachAllPackages()
 rm(list=ls(all=TRUE))
 
 # FOLDERS - ADAPT THIS PATHWAY
-setwd("/Users/jonathanlatner/OneDrive/SECCOPA/")
+setwd("~/GitHub/distribution_contyp/")
 
-orig_data_files = "data/EU_SILC_2019/Long_2005_19/data_files/"
-project_data_files = "projects/distribution_contyp/data_files/eu_silc/"
+orig_data_files = "orig_data_files/EU_SILC_2019/Long_2005_19/data_files/"
+project_data_files = "data_files/eu_silc/"
 
 # LIBRARY
 library(dplyr)

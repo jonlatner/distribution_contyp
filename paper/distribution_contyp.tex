@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumerate}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{dcolumn} %for use with R package stargazer
+\usepackage[hang,flushmargin]{footmisc} 
+
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{natbib}
+
+\usepackage{hyperref}
+\hypersetup{pdfstartpage=1, pdfpagemode=UseNone, pdfstartview=FitH, pdffitwindow=true, bookmarks=false, colorlinks=true, linkcolor=blue, citecolor=blue}
+
+\title{Temporary employment in Europe: Stagnating rates and rising risks}
+
+\author{Jonathan P. Latner\thanks{Universit{\"a}t Bamberg} \footnote{\url{jonathan.latner@uni-bamberg.de}.  This project has received funding from the European Research Council (ERC) under the Horizon 2020 research and innovation program (grant agreement No 758491).  The author would like to thank the following individuals (in alphabetical order):  Sophia Fauser, Michael Gebel, Chen-Hao Hsu, Andreas Haupt, Richard Latner, Ellen Pechman, Klaus Pforr, James Raymo, Sonja Scheuring, Jody Schimek, attendees of the CSIS Brown Bag Seminar at the University of Trento, and the reviewers and editors of European Societies.}}
+
+\date{\vspace{-5ex}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\noindent 
+There is a perception that temporary employment is rising in Europe, but there is little evidence to support this.  One explanation is that temporary employment is rising, but cross-sectional data underestimate both the size and growth of temporary employment.  Using data on 31 European countries and a sample of prime-age workers, we compare and contrast changes in the temporary employment rate in a single period of time using cross-sectional data from the European Labour Force Survey (LFS), with changes in the risk of experiencing temporary employment in multiple periods of time using longitudinal data from the European Survey of Income and Living Conditions (SILC).  Our results suggest that the temporary employment rate stagnated over time, but the risk of experiencing it continues to rise.  Cross-sectional data suggests that between 1996 and 2007, the temporary employment rate increased in Europe by 28\%, but between 2007 and 2019, there was little change.  By contrast, panel data suggests that between 2013 and 2019, the risk of experiencing at least one temporary employment contract rose 36\%.  Our contribution provides insight into the nature of employment experiences associated with insecurity.  
+
+\noindent
+\\
+{\bf Key words:} temporary employment, trends and distribution, life course, international comparison, labour markets, Europe \\
+{\bf JEL Classifications:} Z13 (economic sociology, economic anthropology, social and economic stratification), J21 (labour force and employment, size, and structure), J08 (labour economics policies)
+
+\noindent
+\\
+{\bf Authors note:} This article has been accepted for publication by, \emph{European Societies}.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graphs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Figures}
+
+% Graphs - LFS
+
+\begin{figure}[htp!]
+    % \centering
+    \caption{Temporary employment rate over time}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_lfs/graph_rate_region.pdf}}
+    \label{graph_eu_lfs_rate_region}
+
+    \footnotesize{Note: Authors calculations using LFS data.  Each cell shows the temporary employment rate for a given region, year, as shown by the thick, black line.  Country, region specifications are shown in table \ref{table_country_panel_years} in Appendix \ref{appendix_tables}.  Before 2007, levels are rising.  After 2007, levels are constant.  In the Eastern region, Poland stands out, with high and rising levels before 2007, but stagnating levels afterward.  In the Southern region, Spain stands out, with high, but declining levels, especially after 2007.  Italy and the Netherlands are among the few countries with high and rising levels before and after 2007.}
+\end{figure}
+
+
+\begin{sidewaysfigure}[htp!]
+    \caption{Temporary employment rate over time, by demographic group (1996 - 2007)}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_lfs/graph_ftc_rate_region_country_group_period_1.pdf}}
+    \label{graph_eu_lfs_pct_combo_1}
+    \footnotesize{Note: Authors calculations using LFS data.  Each cell shows the temporary employment rate for a given region, year, demographic group.  For easier interpretation, highlighted subplots indicate where the temporary employment rate rose at least 1 percentage point and 10\% between 1996 and 2007.  Before 2007, the temporary employment rate is rising in almost every region and subgroup, except in the Anglophone and Nordic regions and among those with higher levels of education.}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[htp!]
+    \caption{Temporary employment rate over time, by demographic group (2007 - 2019)}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_lfs/graph_ftc_rate_region_country_group_period_2.pdf}}
+    \label{graph_eu_lfs_pct_combo_2}    
+    \footnotesize{Note: Authors calculations using LFS data.  Each cell shows the temporary employment rate for a given region, year, demographic group.  For easier interpretation, highlighted subplots indicate where the temporary employment rate rose at least 1 percentage points and 10\% between 2007 and 2019. After 2007, the temporary employment rate is constant within almost all demographic groups and regions.  However, there are two exceptions.  In the Southern region, the rate continues to rise in every demographic group, except those with higher levels of education.  Further, among those with lower levels of education, the rate continues to rise in every region, except the Anglophone region.}
+\end{sidewaysfigure}
+
+% Graphs - SILC
+
+\clearpage
+\begin{sidewaysfigure}[htp!]
+    \caption{Predicted probability of a temporary contract}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_silc/graph_eu_silc_glm_yhat_wt.pdf}}
+    \label{graph_glm_yhat}
+    \footnotesize{Note: Authors calculations using SILC data.  First row plots the probability of experiencing at least one temporary contract (ref: 0).  Second row plots the probability of experiencing multiple temporary contracts (ref: 1).  Third row plots the probability of experiencing a temporary contract that is multiple years long (ref: 1).  The interpretation is that temporary employment risk is rising, but the relative insecurity of temporary employment may be declining as the risk of receiving a multi-year contract is rising and the risk of receiving multiple contracts is constant or declining.}
+\end{sidewaysfigure}
+
+% Graphs - average marginal effect
+\begin{sidewaysfigure}[htp!]
+    \caption{AME of main effects on the probability of experiencing a temporary contract}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_silc/graph_eu_silc_glm_mfx_ever_wt.pdf}}
+    \label{graph_glm_mfx_ever}
+    \footnotesize{Note: Authors calculations using SILC data.  Plots the average marginal effect of independent variables on the probability of experiencing at least 1 temporary contract (ref: 0).  Between groups, risk is higher among women, younger workers, and those with lower levels of education.  However, within groups, there is little change in the demographic distribution of that rising risk.}
+\end{sidewaysfigure}
+
+\clearpage
+\begin{sidewaysfigure}[htp!]
+    \caption{AME of main effects on the number of temporary contracts}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_silc/graph_eu_silc_glm_mfx_num_wt.pdf}}
+    \label{graph_glm_mfx_num}
+    \footnotesize{Note: Authors calculations using SILC data.  Plots the average marginal effect of independent variables on the probability of experiencing at least 2 temporary contracts (ref: 1).  In general, risk of multiple contracts is distributed equally between demographic groups.  Further, there is little change in the distribution of risk within demographic groups.}
+\end{sidewaysfigure}
+
+\clearpage
+\begin{sidewaysfigure}[htp!]
+    \caption{AME of main effects on the duration of temporary contracts}
+    \resizebox{\textwidth}{!}{\includegraphics{../graphs/eu_silc/graph_eu_silc_glm_mfx_dur_wt.pdf}}
+    \label{graph_glm_mfx_dur}
+    \footnotesize{Note: Authors calculations using SILC data.  Plots the average marginal effect of independent variables on the probability of experiencing a temporary contract that is at least 2 years long (ref: 1). In general, risk of multi-year contracts is distributed equally between demographic groups.  Further, there is little change in the distribution of risk within demographic groups.}
+\end{sidewaysfigure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\appendix
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\renewcommand*\thetable{\Alph{section}.\arabic{table}}
+\renewcommand*\thefigure{\Alph{section}.\arabic{figure}}
+\renewcommand{\theHfigure}{\Alph{section}.\arabic{table}}
+\renewcommand{\theHtable}{\Alph{section}.\arabic{figure}}
+
+\input{appendix}
+
+\end{document}
+

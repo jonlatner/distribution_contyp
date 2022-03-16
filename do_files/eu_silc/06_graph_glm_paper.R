@@ -1,4 +1,4 @@
-# Top commands --------------------------------------------------------------
+# Top commands ----
 
 # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 detachAllPackages <- function() {
@@ -66,7 +66,7 @@ region <- c("Continental", "Continental", "Continental", "Continental", "Contine
 geography <- cbind(country, region)
 rm(country, region)
 
-# Clean ever temporary --------------------------------------------------------------
+# Clean ever temporary ----
 
 # Clean (AME - group level interaction) 
 
@@ -123,7 +123,7 @@ df_yhat_country_ever <- df_yhat_country_ever %>%
                region = as.factor(region)) %>%
         arrange(country,panel)
 
-# Clean contract_num contracts --------------------------------------------------------------
+# Clean contract_num contracts ----
 
 # Clean (AME - group level interaction) 
 
@@ -182,7 +182,7 @@ df_yhat_country_num <- df_yhat_country_num %>%
                region = as.factor(region)) %>%
         arrange(country,panel)
 
-# Clean contract_dur contracts --------------------------------------------------------------
+# Clean contract_dur contracts ----
 
 # Clean (AME - group level interaction) 
 

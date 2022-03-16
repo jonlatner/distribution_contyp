@@ -1,4 +1,4 @@
-# Top commands --------------------------------------------------------------
+# Top commands ----
 
 # https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 detachAllPackages <- function() {
