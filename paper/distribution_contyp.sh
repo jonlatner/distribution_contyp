@@ -22,8 +22,14 @@
 pdflatex -interaction batchmode distribution_contyp.tex
 echo "PDF1 =" $?
 
+bibtex distribution_contyp
+echo "BIB1 =" $?
+
 pdflatex -interaction batchmode distribution_contyp.tex
 echo "PDF2 =" $?
+
+pdflatex -interaction batchmode distribution_contyp.tex
+echo "PDF3 =" $?
 
 rm *.aux
 rm *.bbl
