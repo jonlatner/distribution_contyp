@@ -2,8 +2,6 @@
 
 [![DOI:10.7910/DVN/U0RTXA](http://img.shields.io/badge/DOI-10.7910/DVN/ZBLXPR.425840-B31B1B.svg)](https://doi.org/10.7910/DVN/ZBLXPR)
 
-<a href="https://www.google.com" target="_blank">click here</a>
-
 Repository for the codes used for the analyses of Jonathan Latner (2022), "Temporary employment in Europe: Stagnating rates and rising risks."  This article has been accepted for publication by the journal, European Societies.
 
 All analyses in the article were conducted using R. 
