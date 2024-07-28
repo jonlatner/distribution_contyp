@@ -13,16 +13,25 @@ This article has been accepted for publication by the journal, European Societie
 ## Output examples
 
 ### Figure 1
-<img width="688" alt="Figure 1" src="https://github.com/jonlatner/wages_contyp/blob/main/graphs/graph_multiple_events_contyp_paper.png">
+<img width="688" alt="Figure 1" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_rate_region.png">
 
 ### Figure 2
-<img width="688" alt="Figure 2" src="https://github.com/jonlatner/wages_contyp/blob/main/graphs/graph_multiple_events_contyp_post_paper.png">
+<img width="688" alt="Figure 2" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_ftc_rate_region_country_group_period_1.png">
 
 ### Figure 3
-<img width="688" alt="Figure 3" src="https://github.com/jonlatner/wages_contyp/blob/main/graphs/graph_multiple_events_unmp_better_paper.png">
+<img width="688" alt="Figure 3" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_ftc_rate_region_country_group_period_2.png">
 
 ### Figure 4
-<img width="688" alt="Figure 4" src="https://github.com/jonlatner/wages_contyp/blob/main/graphs/graph_multiple_events_unmp_post_free_scale.png">
+<img width="688" alt="Figure 4" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_eu_silc_glm_yhat_wt.png">
+
+### Figure 5
+<img width="688" alt="Figure 5" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_eu_silc_glm_yhat_wt.png">
+
+### Figure 6
+<img width="688" alt="Figure 6" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_eu_silc_glm_mfx_num_wt.png">
+
+### Figure 7
+<img width="688" alt="Figure 7" src="https://github.com/jonlatner/distribution_contyp/blob/main/graphs/graph_eu_silc_glm_mfx_dur_wt.png">
 
 ## License
 
