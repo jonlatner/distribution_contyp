@@ -10,7 +10,7 @@ All analyses in the article were conducted using R.  Complete R codes used are i
 
 This article has been accepted for publication by the journal, European Societies.  https://www.tandfonline.com/doi/pdf/10.1080/14616696.2022.2072930
 
-This article has won the European Sociological Association (ESA) award for the best article published in the European Societies journal for the period 2021-2023.  For more information click [here](https://www.europeansociology.org/conference/2024/article/e38976b6-4419-4bf6-84f8-82976771fc31).
+In 2024, this article won the European Sociological Association (ESA) award for the best article published in the European Societies journal for the period 2021-2023.  For more information click [here](https://www.europeansociology.org/conference/2024/article/e38976b6-4419-4bf6-84f8-82976771fc31).
 
 ## Output examples
 
